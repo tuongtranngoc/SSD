@@ -1,2 +1,2 @@
 # SSD
-SSD implementation using Pytorch framework
+SSD implementation using Pytorch + Pytorch Lightning framework
