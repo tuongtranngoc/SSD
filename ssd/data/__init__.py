@@ -1,0 +1,1 @@
+from ..cfg.defaults import Configuration as cfg
