@@ -27,7 +27,7 @@ class COCODataset(BaseDataset):
             image, bboxes, labels = self.aug(image, bboxes, labels)
         image = image[..., ::-1]
         image, bboxes, labels = self.transform(image, bboxes, labels)
-
+        
         return image, bboxes, labels
     
     def __len__(self): return len(self.coco_dataset)
