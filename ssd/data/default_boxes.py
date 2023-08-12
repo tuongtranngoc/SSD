@@ -20,35 +20,36 @@ class DefaultBoxes:
     @classmethod
     def build_default_boxes(cls):
         df_bboxes = defaultdict()
-
-        for k in cls.m:
-            df_bboxes[k] = torch.zeros(size=(k, k, 6 , 4))
-
-            idxs_i = torch.arange(k)
-            idxs_j = torch.arange(k)
+        
+        for k, fm_size in enumerate(cls.m):
+            df_bboxes[fm_size] = torch.zeros(size=(fm_size, fm_size, 6 , 4))
+            collation_value = cls.im_size // fm_size
+            
+            idxs_i = torch.arange(fm_size)
+            idxs_j = torch.arange(fm_size)
             pos_j, pos_i = torch.meshgrid(idxs_j, idxs_i, indexing='ij')
 
-            xc = (pos_i + 0.5) / k
-            yc = (pos_j + 0.5) / k
+            xc = (pos_i + 0.5) / fm_size
+            yc = (pos_j + 0.5) / fm_size
 
             xcyc = torch.stack((xc, yc), dim=-1)
             xcyc = xcyc.unsqueeze(2).expand((-1, -1, 6, -1))
-            df_bboxes[k][..., :2] = xcyc
+            df_bboxes[fm_size][..., :2] = xcyc
 
             wh_ratios = []
             s_k = cls.s_min + (cls.s_max - cls.s_min) * (k - 1) / (len(cls.m) - 1)
-            for i, a_r in enumerate(cls.ratios):
+            for a_r in cls.ratios:
                 if a_r == 1:
                     s_k_1 = cls.s_min + (cls.s_max - cls.s_min) * (k + 1 - 1) / (len(cls.m) - 1)
                     s_k_0 = math.sqrt(s_k * s_k_1)
-                    w_k = s_k_0 * math.sqrt(a_r) / cls.im_size
-                    h_k = s_k_0 / math.sqrt(a_r) / cls.im_size
+                    w_k = s_k_0 * math.sqrt(a_r) 
+                    h_k = s_k_0 / math.sqrt(a_r) 
                     wh_ratios.append([w_k, h_k])
 
-                w_k = s_k * math.sqrt(a_r) / cls.im_size
-                h_k = s_k / math.sqrt(a_r) / cls.im_size
+                w_k = s_k * math.sqrt(a_r)
+                h_k = s_k / math.sqrt(a_r)
                 wh_ratios.append([w_k, h_k])
-            df_bboxes[k][..., 2:] = torch.tensor(wh_ratios)
+            df_bboxes[fm_size][..., 2:] = torch.tensor(wh_ratios)
 
         return df_bboxes
     
