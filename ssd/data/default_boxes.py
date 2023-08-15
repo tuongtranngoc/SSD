@@ -4,13 +4,12 @@ from __future__ import absolute_import
 
 import math
 import torch
-import numpy as np
 from collections import defaultdict
-
 
 from ..utils import cfg
 
-class DefaultBoxes:
+
+class DefaultBoxesGenerator:
     m = cfg.default_boxes.fm_sizes
     s_min = cfg.default_boxes.s_min
     s_max = cfg.default_boxes.s_max
@@ -22,8 +21,8 @@ class DefaultBoxes:
         df_bboxes = defaultdict()
         
         for k, fm_size in enumerate(cls.m):
+            k += 1
             df_bboxes[fm_size] = torch.zeros(size=(fm_size, fm_size, 6 , 4))
-            collation_value = cls.im_size // fm_size
             
             idxs_i = torch.arange(fm_size)
             idxs_j = torch.arange(fm_size)
@@ -41,22 +40,23 @@ class DefaultBoxes:
             for a_r in cls.ratios:
                 if a_r == 1:
                     s_k_1 = cls.s_min + (cls.s_max - cls.s_min) * (k + 1 - 1) / (len(cls.m) - 1)
-                    s_k_0 = math.sqrt(s_k * s_k_1)
-                    w_k = s_k_0 * math.sqrt(a_r) 
-                    h_k = s_k_0 / math.sqrt(a_r) 
+                    s_prime_k = math.sqrt(s_k * s_k_1)
+                    wh_ratios.extend([[s_k, s_k], [s_prime_k, s_prime_k]])
+                else:
+                    w_k = s_k * math.sqrt(a_r)
+                    h_k = s_k / math.sqrt(a_r)
                     wh_ratios.append([w_k, h_k])
 
-                w_k = s_k * math.sqrt(a_r)
-                h_k = s_k / math.sqrt(a_r)
-                wh_ratios.append([w_k, h_k])
-            df_bboxes[fm_size][..., 2:] = torch.tensor(wh_ratios)
-
+            wh_ratios = torch.tensor(wh_ratios, dtype=torch.float32)
+            wh_ratios = torch.clamp(wh_ratios, min=0.0, max=1.0)
+            df_bboxes[fm_size][..., 2:] = wh_ratios
+        
         return df_bboxes
-    
-    @classmethod
-    def decode_defaultbox(cls, bboxes):
-        pass
-    
+
+
+
+class BBoxMatcher:
+    pass
 
 if __name__ == "__main__":
-    DefaultBoxes.build_default_boxes()    
+    DefaultBoxesGenerator.build_default_boxes()    
