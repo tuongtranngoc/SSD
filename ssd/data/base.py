@@ -53,10 +53,12 @@ class BaseDataset(Dataset):
             
             bboxes = []
             for ann in anns:
-                if not ann['iscrowd']: continue
+                if ann['iscrowd']: continue
                 bbox = ann['bbox']
+                bbox[2] += bbox[0] 
+                bbox[3] += bbox[1]
                 cate = ann['category_id'] - 1
-                bbox_info = bbox + [cate]
+                bbox_info = [cate] + bbox
                 bboxes.append(bbox_info)
 
             dataset.append([img_path, np.array(bboxes)])

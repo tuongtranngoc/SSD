@@ -37,9 +37,10 @@ class COCODataset(BaseDataset):
         bboxes = torch.tensor(bboxes, dtype=torch.float32)
         defaultboxes_dict = DefaultBoxesGenerator.build_default_boxes()
         defaultboxes = DefaultBoxesGenerator.merge_defaultboxes(defaultboxes_dict)
-        defaultboxes = BoxUtils.xcycwh_to_xyxy(defaultboxes)
+        defaultboxes = BoxUtils.xcycwh_to_xyxy(defaultboxes, cfg.models.image_size)
         ious = BoxUtils.compute_iou(bboxes, defaultboxes)
         matched_dfboxes = defaultboxes[ious > cfg.default_boxes.iou_thresh]
+
         
     
     def __len__(self): return len(self.coco_dataset)
@@ -48,5 +49,6 @@ class COCODataset(BaseDataset):
         image_pth, lables = self.coco_dataset[index]
         cls_ids, bboxes = lables[:, 0], lables[:, 1:]
         image, bboxes, cls_ids = self.get_image_label(image_pth, bboxes, lables)
+        self.match_defaulboxes(cls_ids, bboxes)
 
     

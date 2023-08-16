@@ -9,7 +9,7 @@ class BoxUtils:
 
     @classmethod
     def xcycwh_to_xyxy(cls, bboxes, max_size):
-        bboxes = bboxes.copy()
+        bboxes = bboxes.clone()
         x1y1 = bboxes[..., :2] - bboxes[..., 2:] / 2
         x2y2 = bboxes[..., :2] + bboxes[..., 2:] / 2
 
@@ -20,6 +20,8 @@ class BoxUtils:
     
     @classmethod
     def compute_iou(cls, x, y):
+        import pdb
+        pdb.set_trace()
         x1 = torch.max(x[..., 0], y[..., 0])
         y1 = torch.max(x[..., 1], y[..., 1])
         x2 = torch.min(x[..., 2], y[..., 2])

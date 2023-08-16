@@ -8,7 +8,7 @@ class Transform:
     def __init__(self, image_size) -> None:
         self.image_size = image_size
         self.transform = A.Compose([
-            A.Resize(self.image_size[0], self.image_size[1]),
+            A.Resize(self.image_size, self.image_size),
             A.Normalize(),
             ToTensorV2(),
         ],
