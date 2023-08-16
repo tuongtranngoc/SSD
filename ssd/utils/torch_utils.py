@@ -41,6 +41,8 @@ class BoxUtils:
         bboxes = bboxes.clone()
         bboxes[..., [0, 2]] /= cls.w
         bboxes[..., [1, 3]] /= cls.h
+        bboxes[..., [0, 2]] = bboxes[..., [0, 2]].clamp(min=0.0, max=1.0)
+        bboxes[..., [1, 3]] = bboxes[..., [1, 3]].clamp(min=0.0, max=1.0)
         return bboxes
     
     @classmethod
