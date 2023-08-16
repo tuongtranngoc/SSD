@@ -29,18 +29,17 @@ class COCODataset(BaseDataset):
             image, bboxes, labels = self.aug(image, bboxes, labels)
         image = image[..., ::-1]
         image, bboxes, labels = self.transform(image, bboxes, labels)
-        
-        return image, bboxes, labels
+        return image, image, bboxes, labels
 
     def match_defaulboxes(self, id_cls, bboxes):
-        bboxes /= cfg.models.image_size
         bboxes = torch.tensor(bboxes, dtype=torch.float32)
+        bboxes = BoxUtils.normalize_box(bboxes)
         defaultboxes_dict = DefaultBoxesGenerator.build_default_boxes()
         defaultboxes = DefaultBoxesGenerator.merge_defaultboxes(defaultboxes_dict)
-        defaultboxes = BoxUtils.xcycwh_to_xyxy(defaultboxes, cfg.models.image_size)
+        defaultboxes = BoxUtils.xcycwh_to_xyxy(defaultboxes)
         ious = BoxUtils.compute_iou(bboxes, defaultboxes)
         matched_dfboxes = defaultboxes[ious > cfg.default_boxes.iou_thresh]
-
+        return matched_dfboxes
         
     
     def __len__(self): return len(self.coco_dataset)

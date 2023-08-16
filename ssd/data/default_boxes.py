@@ -50,7 +50,7 @@ class DefaultBoxesGenerator:
             wh_ratios = torch.tensor(wh_ratios, dtype=torch.float32)
             wh_ratios = torch.clamp(wh_ratios, min=0.0, max=1.0)
             df_bboxes[fm_size][..., 2:] = wh_ratios
-        
+                
         return df_bboxes
     
     @classmethod
