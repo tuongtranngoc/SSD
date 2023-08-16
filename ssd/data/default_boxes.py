@@ -20,8 +20,8 @@ class DefaultBoxesGenerator:
     def build_default_boxes(cls):
         df_bboxes = defaultdict()
         
-        for k, fm_size in enumerate(cls.m):
-            k += 1
+        for i, fm_size in enumerate(cls.m):
+            k = i + 1
             df_bboxes[fm_size] = torch.zeros(size=(fm_size, fm_size, 6 , 4))
             
             idxs_i = torch.arange(fm_size)
@@ -52,6 +52,15 @@ class DefaultBoxesGenerator:
             df_bboxes[fm_size][..., 2:] = wh_ratios
         
         return df_bboxes
+    
+    @classmethod
+    def merge_defaultboxes(cls, dfboxes_dict:dict):
+        default_boxes = []
+        for fm, dfbox in dfboxes_dict.items():
+            dfbox = dfbox.reshape(-1, 4)
+            default_boxes.append(dfbox)
+        default_boxes = torch.cat(default_boxes, dim=0)
+        return default_boxes
 
 
 

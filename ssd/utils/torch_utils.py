@@ -18,9 +18,8 @@ class BoxUtils:
 
         return x1y1x2y2
     
-    def compute_iou(cls, pred, target):
-        x = cls.xcycwh_to_xyxy(target[..., :4])
-        y = cls.xcycwh_to_xyxy(pred[..., :4])
+    @classmethod
+    def compute_iou(cls, x, y):
         x1 = torch.max(x[..., 0], y[..., 0])
         y1 = torch.max(x[..., 1], y[..., 1])
         x2 = torch.min(x[..., 2], y[..., 2])

@@ -2,14 +2,16 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
 
-
+import torch
 import glob
 import cv2
 import os
 
+from .default_boxes import DefaultBoxesGenerator
 from .augmentations import AlbumAug
 from .base import BaseDataset
 from .utils import Transform
+from . import BoxUtils
 from . import cfg
 
 
@@ -29,10 +31,22 @@ class COCODataset(BaseDataset):
         image, bboxes, labels = self.transform(image, bboxes, labels)
         
         return image, bboxes, labels
+
+    def match_defaulboxes(self, id_cls, bboxes):
+        bboxes /= cfg.models.image_size
+        bboxes = torch.tensor(bboxes, dtype=torch.float32)
+        defaultboxes_dict = DefaultBoxesGenerator.build_default_boxes()
+        defaultboxes = DefaultBoxesGenerator.merge_defaultboxes(defaultboxes_dict)
+        defaultboxes = BoxUtils.xcycwh_to_xyxy(defaultboxes)
+        ious = BoxUtils.compute_iou(bboxes, defaultboxes)
+        matched_dfboxes = defaultboxes[ious > cfg.default_boxes.iou_thresh]
+        
     
     def __len__(self): return len(self.coco_dataset)
 
     def __getitem__(self, index):
-        image_pth, labels = self.coco_dataset[index]
-        
+        image_pth, lables = self.coco_dataset[index]
+        cls_ids, bboxes = lables[:, 0], lables[:, 1:]
+        image, bboxes, cls_ids = self.get_image_label(image_pth, bboxes, lables)
+
     
