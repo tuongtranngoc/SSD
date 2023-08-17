@@ -27,10 +27,10 @@ class DefaultBoxesGenerator:
             idxs_i = torch.arange(fm_size)
             idxs_j = torch.arange(fm_size)
             pos_j, pos_i = torch.meshgrid(idxs_j, idxs_i, indexing='ij')
-
+            
             xc = (pos_i + 0.5) / fm_size
             yc = (pos_j + 0.5) / fm_size
-
+            
             xcyc = torch.stack((xc, yc), dim=-1)
             xcyc = xcyc.unsqueeze(2).expand((-1, -1, 6, -1))
             df_bboxes[fm_size][..., :2] = xcyc
