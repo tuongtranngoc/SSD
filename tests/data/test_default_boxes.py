@@ -1,29 +1,30 @@
+from . import BoxUtils
+from . import BaseDataset
+from . import coco_cfg as cfg
+from . import default_cfg
 from . import DefaultBoxesGenerator
-from . import BaseDataset, coco_cfg
-from . import default_cfg as default_cfg
 
-import numpy as np
-import torch
 import cv2
 
 
 def test():
-    im_size = 300
-    im_fm = np.ones(shape=(im_size, im_size, 3)) * 255
-    df_bboxes = DefaultBoxesGenerator.build_default_boxes()
-    for k, df_bb in df_bboxes.items():
-        if k != 3: continue
-        grid_size = im_size // k
-        for i in range(k):
-            im_fm = cv2.line(im_fm, (grid_size * i, 0), (grid_size * i, im_size), (0, 0, 255), 1)
-        for i in range(k):
-            im_fm = cv2.line(im_fm, (0, i * grid_size), (im_size, i * grid_size), (0, 0, 255), 1)
-        
-        
+    train_dataset = BaseDataset(label_path=cfg.train_label_path, image_path=cfg.train_img_path)
+    ds = train_dataset.load_coco_dataset()
+    fm_sizes = default_cfg.default_boxes.fm_sizes
+    for i in range(5):
+        im_pth, bboxes = ds[i]
+        im = cv2.imread(im_pth)
+        for box in bboxes:
+            im = cv2.rectangle(im, (int(box[1]), int(box[2])), (int(box[3]), int(box[4])), color=(0, 0, 255), thickness=1)
+        im = cv2.resize(im, (300, 300))
+        dfboxes_fm1 = DefaultBoxesGenerator.build_default_boxes()[fm_sizes[-2]].reshape(-1, 4)
+        dfboxes_fm1 = BoxUtils.xcycwh_to_xyxy(dfboxes_fm1)
+        dfboxes_fm1 = BoxUtils.denormalize_box(dfboxes_fm1)
+        dfboxes_fm1 = dfboxes_fm1.detach().cpu().numpy()
+        for box in dfboxes_fm1:
+            im = cv2.rectangle(im, (int(box[0]), int(box[1])), (int(box[2]), int(box[3])), color=(255, 0, 0), thickness=1)
         import pdb
         pdb.set_trace()
-
-
 
 
 if __name__ == "__main__":
