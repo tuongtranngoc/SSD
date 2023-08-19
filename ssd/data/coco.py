@@ -25,11 +25,12 @@ class COCODataset(BaseDataset):
 
     def get_image_label(self, image_pth, bboxes, labels):
         image = cv2.imread(image_pth)
+        image_org = image.copy()
         if self.is_augment:
             image, bboxes, labels = self.aug(image, bboxes, labels)
         image = image[..., ::-1]
         image, bboxes, labels = self.transform(image, bboxes, labels)
-        return image, bboxes, labels
+        return image, bboxes, labels, image_org
 
     def match_defaulboxes(self, id_cls, bboxes):
         bboxes = torch.tensor(bboxes, dtype=torch.float32)
@@ -38,8 +39,8 @@ class COCODataset(BaseDataset):
         defaultboxes = DefaultBoxesGenerator.merge_defaultboxes(defaultboxes_dict)
         defaultboxes = BoxUtils.xcycwh_to_xyxy(defaultboxes)
         ious = BoxUtils.pairwise_ious(bboxes, defaultboxes)
-        matched_dfboxes = defaultboxes[ious.gt(cfg.default_boxes.iou_thresh)]
-        return matched_dfboxes
+        matched_ious, matched_idxs = ious.max(dim=0)
+
         
     
     def __len__(self): return len(self.coco_dataset)

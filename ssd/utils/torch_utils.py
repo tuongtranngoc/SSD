@@ -28,9 +28,10 @@ class BoxUtils:
         y2 = torch.min(x[:, None, 3], y[..., 3])
 
         intersect = torch.clamp((x2-x1), 0) * torch.clamp((y2-y1), 0)
-        unions = abs((x[:, None, 2] - x[:, None,  0]) * (x[:, None, 3] - x[:, None, 1])) + abs((y[..., 2] - y[..., 0]) * (y[..., 3] - y[..., 1])) - intersect
+        unions = abs((x[:, None, 2] - x[:, None,  0]) * (x[:, None, 3] - x[:, None, 1])) + \
+                 abs((y[..., 2] - y[..., 0]) * (y[..., 3] - y[..., 1])) - intersect
         intersect[intersect.gt(0)] = intersect[intersect.gt(0)] / unions[intersect.gt(0)]
-        
+
         return intersect
     
     @classmethod
