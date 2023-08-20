@@ -11,7 +11,7 @@ class SSDLoss(nn.Module):
     def __init__(self) -> None:
         super().__init__()
 
-    def compute_loss(target, predtions, defaultboxes):
+    def compute_loss(gt_bboxes: torch.Tensor, df_bboxes: torch.Tensor, 
+                     class_ids: torch.Tensor, pred_bboxes: torch.Tensor):
         pass
-
     

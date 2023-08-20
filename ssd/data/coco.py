@@ -53,11 +53,21 @@ class COCODataset(BaseDataset):
         class_ids_candicators = class_ids[gt_idx_candicators]
         dfbox_candicators = defaultboxes[dfbox_idx_candicators]
         
+        # Convert xyxy to xcyxwh and simplify targets
         bboxes_candicators = BoxUtils.xyxy_to_xcycwh(bboxes_candicators)
         dfbox_candicators = BoxUtils.xyxy_to_xcycwh(dfbox_candicators)
+        gm = self.simplify_target(bboxes_candicators, dfbox_candicators)
 
-        return bboxes_candicators, dfbox_candicators, class_ids_candicators
+        return gm, class_ids
 
+    def simplify_target(self, gt_bboxes, df_bboxes):
+        g_cx = (gt_bboxes[..., 0] - df_bboxes[..., 0]) / df_bboxes[..., 2]
+        g_cy = (gt_bboxes[..., 1] - df_bboxes[..., 1]) / df_bboxes[..., 3]
+        g_w = torch.log(gt_bboxes[..., 2] / df_bboxes[..., 2])
+        g_h = torch.log(gt_bboxes[..., 3] / df_bboxes[..., 3])
+        gm = torch.stack((g_cx, g_cy, g_w, g_h), dim=1)
+
+        return gm
 
     def __len__(self): return len(self.coco_dataset)
 
@@ -65,6 +75,7 @@ class COCODataset(BaseDataset):
         image_pth, lables = self.coco_dataset[index]
         class_ids, bboxes = lables[:, 0], lables[:, 1:]
         image, bboxes, class_ids = self.get_image_label(image_pth, bboxes, class_ids)
-        self.matching_defaulboxes(bboxes, class_ids)
+        target = self.matching_defaulboxes(bboxes, class_ids)
+        return target
 
     
