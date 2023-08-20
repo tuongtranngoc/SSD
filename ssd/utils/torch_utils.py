@@ -21,6 +21,16 @@ class BoxUtils:
         return x1y1x2y2
     
     @classmethod
+    def xyxy_to_xcycwh(cls, bboxes: torch.Tensor):
+        bboxes = bboxes.clone()
+        wh = bboxes[..., 2:] - bboxes[..., :2]
+        xcyc = bboxes[..., 2:] - wh / 2.0
+        xcyxwh = torch.cat((xcyc, wh), dim=1)
+        xcyxwh = torch.clamp(xcyxwh, min=0, max=1.0)
+
+        return xcyxwh
+    
+    @classmethod
     def pairwise_ious(cls, x:torch.Tensor, y:torch.Tensor):
         x1 = torch.max(x[:, None, 0], y[..., 0])
         y1 = torch.max(x[:, None, 1], y[..., 1])

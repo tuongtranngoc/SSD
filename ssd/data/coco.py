@@ -25,30 +25,46 @@ class COCODataset(BaseDataset):
 
     def get_image_label(self, image_pth, bboxes, labels):
         image = cv2.imread(image_pth)
-        image_org = image.copy()
         if self.is_augment:
             image, bboxes, labels = self.aug(image, bboxes, labels)
         image = image[..., ::-1]
         image, bboxes, labels = self.transform(image, bboxes, labels)
-        return image, bboxes, labels, image_org
+        return image, bboxes, labels
 
-    def match_defaulboxes(self, id_cls, bboxes):
+    def matching_defaulboxes(self, bboxes, class_ids):
         bboxes = torch.tensor(bboxes, dtype=torch.float32)
+        class_ids = torch.tensor(class_ids, dtype=torch.int32)
         bboxes = BoxUtils.normalize_box(bboxes)
         defaultboxes_dict = DefaultBoxesGenerator.build_default_boxes()
         defaultboxes = DefaultBoxesGenerator.merge_defaultboxes(defaultboxes_dict)
         defaultboxes = BoxUtils.xcycwh_to_xyxy(defaultboxes)
-        ious = BoxUtils.pairwise_ious(bboxes, defaultboxes)
-        matched_ious, matched_idxs = ious.max(dim=0)
 
+        # Matching default boxes to any ground truth box with jaccard overlap higher than a threshold (0.5)
+        ious = BoxUtils.pairwise_ious(bboxes, defaultboxes)
+        max_ious, max_idxs = ious.max(dim=0)
+
+        # Indicator for matching the i-th default box to the j-th ground truth box of category p
+        dfbox_idx_candicators = torch.where(max_ious > cfg.default_boxes.iou_thresh)[0]
+        iou_candicators = max_ious[dfbox_idx_candicators]
+        gt_idx_candicators = max_idxs[dfbox_idx_candicators]
+
+        # Preprocess before computing loss during training the model
+        bboxes_candicators = bboxes[gt_idx_candicators]
+        class_ids_candicators = class_ids[gt_idx_candicators]
+        dfbox_candicators = defaultboxes[dfbox_idx_candicators]
         
-    
+        bboxes_candicators = BoxUtils.xyxy_to_xcycwh(bboxes_candicators)
+        dfbox_candicators = BoxUtils.xyxy_to_xcycwh(dfbox_candicators)
+
+        return bboxes_candicators, dfbox_candicators, class_ids_candicators
+
+
     def __len__(self): return len(self.coco_dataset)
 
     def __getitem__(self, index):
         image_pth, lables = self.coco_dataset[index]
-        cls_ids, bboxes = lables[:, 0], lables[:, 1:]
-        image, bboxes, cls_ids = self.get_image_label(image_pth, bboxes, lables)
-        self.match_defaulboxes(cls_ids, bboxes)
+        class_ids, bboxes = lables[:, 0], lables[:, 1:]
+        image, bboxes, class_ids = self.get_image_label(image_pth, bboxes, class_ids)
+        self.matching_defaulboxes(bboxes, class_ids)
 
     
