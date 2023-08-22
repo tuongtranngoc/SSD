@@ -32,41 +32,46 @@ class COCODataset(BaseDataset):
         return image, bboxes, labels
 
     def matching_defaulboxes(self, bboxes, class_ids):
-        bboxes = torch.tensor(bboxes, dtype=torch.float32)
-        class_ids = torch.tensor(class_ids, dtype=torch.int32)
+        bboxes = torch.tensor(bboxes)
+        class_ids = torch.tensor(class_ids, dtype=torch.float32)
         bboxes = BoxUtils.normalize_box(bboxes)
         defaultboxes_dict = DefaultBoxesGenerator.build_default_boxes()
         defaultboxes = DefaultBoxesGenerator.merge_defaultboxes(defaultboxes_dict)
         defaultboxes = BoxUtils.xcycwh_to_xyxy(defaultboxes)
+
+        # Create mask for matched defaultboxes
+        dfboxes_mask = torch.zeros_like(defaultboxes)
+        dflabels_mask = torch.zeros(defaultboxes.size(0), dtype=torch.float32)
 
         # Matching default boxes to any ground truth box with jaccard overlap higher than a threshold (0.5)
         ious = BoxUtils.pairwise_ious(bboxes, defaultboxes)
         max_ious, max_idxs = ious.max(dim=0)
 
         # Indicator for matching the i-th default box to the j-th ground truth box of category p
-        dfbox_idx_candicators = torch.where(max_ious > cfg.default_boxes.iou_thresh)[0]
-        iou_candicators = max_ious[dfbox_idx_candicators]
-        gt_idx_candicators = max_idxs[dfbox_idx_candicators]
-
+        dfbox_idx_pos = torch.where(max_ious > cfg.default_boxes.iou_thresh)[0]
+        iou_pos = max_ious[dfbox_idx_pos]
+        gt_idx_pos = max_idxs[dfbox_idx_pos]
+        
         # Preprocess before computing loss during training the model
-        bboxes_candicators = bboxes[gt_idx_candicators]
-        class_ids_candicators = class_ids[gt_idx_candicators]
-        dfbox_candicators = defaultboxes[dfbox_idx_candicators]
+        bboxes_pos = bboxes[gt_idx_pos]
+        dflabels_mask[gt_idx_pos] = class_ids[gt_idx_pos]
+        dfbox_pos = defaultboxes[dfbox_idx_pos]
         
         # Convert xyxy to xcyxwh and simplify targets
-        bboxes_candicators = BoxUtils.xyxy_to_xcycwh(bboxes_candicators)
-        dfbox_candicators = BoxUtils.xyxy_to_xcycwh(dfbox_candicators)
-        gm = self.simplify_target(bboxes_candicators, dfbox_candicators)
+        bboxes_pos = BoxUtils.xyxy_to_xcycwh(bboxes_pos)
+        dfbox_pos = BoxUtils.xyxy_to_xcycwh(dfbox_pos)
 
-        return gm, class_ids
+        dfbox_pos = self.simplify_target(bboxes_pos, dfbox_pos)
+        dfboxes_mask[dfbox_idx_pos] = dfbox_pos
+        
+        return dfboxes_mask, dflabels_mask
 
     def simplify_target(self, gt_bboxes, df_bboxes):
-        g_cx = (gt_bboxes[..., 0] - df_bboxes[..., 0]) / df_bboxes[..., 2]
-        g_cy = (gt_bboxes[..., 1] - df_bboxes[..., 1]) / df_bboxes[..., 3]
-        g_w = torch.log(gt_bboxes[..., 2] / df_bboxes[..., 2])
-        g_h = torch.log(gt_bboxes[..., 3] / df_bboxes[..., 3])
-        gm = torch.stack((g_cx, g_cy, g_w, g_h), dim=1)
-
+        # Simplify the location
+        g_cxcy = (gt_bboxes[..., :2] - df_bboxes[..., :2]) / df_bboxes[..., 2:]
+        g_wh = torch.log(gt_bboxes[..., 2:] / df_bboxes[..., 2:])
+        gm = torch.cat((g_cxcy, g_wh), dim=1)
+        
         return gm
 
     def __len__(self): return len(self.coco_dataset)
@@ -76,6 +81,6 @@ class COCODataset(BaseDataset):
         class_ids, bboxes = lables[:, 0], lables[:, 1:]
         image, bboxes, class_ids = self.get_image_label(image_pth, bboxes, class_ids)
         target = self.matching_defaulboxes(bboxes, class_ids)
-        return target
+        return image, target
 
     
