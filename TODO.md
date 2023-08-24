@@ -1,8 +1,17 @@
 ## Tasks
 
-1. <doing>Study Pytorch Lightning
+1. Study Pytorch Lightning
 2. <del>Implement choosing scales and aspect ratios for default boxes
 3. <del>Matching default boxes to ground truth boxes
-4. <doing>Implement the loss function
+4. <del>Implement the loss function
 5. Implement the network
 6. Implement traing and valid with Pytorch Lightning
+7. Tensorboard
+8. Logging
+9. dvc, MLFlow
+10. DIOU loss
+11. Export Engines: ONNX, TensorRT, PaddlePaddle
+12. Video + Tracking
+13. Model Ensembling
+14. Hyperparameter Evolution
+15. Pruning/Sparsity
