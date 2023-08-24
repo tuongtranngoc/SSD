@@ -16,4 +16,5 @@ class Configuration:
         'pos_ratio': 3,
         'neg_ratio': 1,
         'alpha': 1,
+        'label_smooth': 0.1
     })

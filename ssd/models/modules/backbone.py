@@ -8,7 +8,7 @@ model_urls = {
 }
 
 
-class VGG16(nn.Module):
+class FeatureExtractorVGG16(nn.Module):
     def __init__(self, batch_norm=False) -> None:
         super().__init__()
         cfg = [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M_ceil_mode', 512, 512, 512]
@@ -40,9 +40,9 @@ class VGG16(nn.Module):
 def build_backbone(arch_name='vgg16', pretrained=True):
     feat_dims = 512
     if arch_name == "vgg16":
-        model = VGG16()
+        model = FeatureExtractorVGG16()
     elif arch_name == "vgg16-bn":
-        model = VGG16(batch_norm=True)
+        model = FeatureExtractorVGG16(batch_norm=True)
     else:
         RuntimeError("Only support model in [vgg16, vgg16-bn]")
     

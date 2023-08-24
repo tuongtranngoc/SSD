@@ -1,4 +1,4 @@
-from ssd.models.modules.backbone import VGG16, build_backbone
+from ssd.models.modules.backbone import FeatureExtractorVGG16, build_backbone
 import torch
 
 def test():
