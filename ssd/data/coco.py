@@ -33,7 +33,7 @@ class COCODataset(BaseDataset):
 
     def matching_defaulboxes(self, bboxes, class_ids):
         bboxes = torch.tensor(bboxes)
-        class_ids = torch.tensor(class_ids, dtype=torch.float32)
+        class_ids = torch.tensor(class_ids, dtype=torch.float32).unsqueeze(1)
         bboxes = BoxUtils.normalize_box(bboxes)
         defaultboxes_dict = DefaultBoxesGenerator.build_default_boxes()
         defaultboxes = DefaultBoxesGenerator.merge_defaultboxes(defaultboxes_dict)
@@ -41,7 +41,7 @@ class COCODataset(BaseDataset):
 
         # Create mask for matched defaultboxes
         dfboxes_mask = torch.zeros_like(defaultboxes)
-        dflabels_mask = torch.zeros(defaultboxes.size(0), dtype=torch.float32)
+        dflabels_mask = torch.zeros(defaultboxes.size(0), dtype=torch.float32).unsqueeze(1)
 
         # Matching default boxes to any ground truth box with jaccard overlap higher than a threshold (0.5)
         ious = BoxUtils.pairwise_ious(bboxes, defaultboxes)
@@ -80,7 +80,7 @@ class COCODataset(BaseDataset):
         image_pth, lables = self.coco_dataset[index]
         class_ids, bboxes = lables[:, 0], lables[:, 1:]
         image, bboxes, class_ids = self.get_image_label(image_pth, bboxes, class_ids)
-        target = self.matching_defaulboxes(bboxes, class_ids)
-        return image, target
+        targets = self.matching_defaulboxes(bboxes, class_ids)
+        return image, targets
 
     

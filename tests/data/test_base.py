@@ -1,5 +1,5 @@
-from . import coco_cfg as cfg
-from . import BaseDataset
+from .. import coco_cfg as cfg
+from .. import BaseDataset
 
 def test():
     train_dataset = BaseDataset(label_path=cfg.train_label_path, image_path=cfg.train_img_path)
