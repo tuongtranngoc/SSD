@@ -1,10 +1,10 @@
-from . import FeatureExtractorVGG16, build_backbone
+from . import *
 import torch
 
 def test():
     x = torch.randn((1, 3, 300, 300))
-    backbone, _ = build_backbone('vgg16', pretrained=True)
-    out = backbone(x)
+    ssd = SSD()
+    out = ssd(x)
 
     import pdb
     pdb.set_trace()

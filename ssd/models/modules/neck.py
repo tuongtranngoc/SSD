@@ -9,13 +9,55 @@ import torch.nn as nn
 class SSDNeck(nn.Module):
     def __init__(self, feat_dims) -> None:
         super().__init__()
-        self.conv6 = nn.Conv2d(feat_dims, 1024, kernel_size=3, padding=1)
-        self.conv7 = nn.Conv2d(1024, 1024, kernel_size=1, padding=1)
-        self.conv8_2 = nn.Conv2d(1024, 512, kernel_size=3, padding=0)
-        self.conv9_2 = nn.Conv2d(512, 256, kernel_size=3, padding=1)
-        self.conv10_2 = nn.Conv2d(256, 256, kernel_size=3, padding=1)
+        # FC
+        self.fc = nn.Sequential(
+            # conv6(FC6)
+            nn.Conv2d(feat_dims, 1024, kernel_size=3, padding=1, stride=2),
+            nn.ReLU(inplace=True),
+            # conv7(FC7)
+            nn.Conv2d(1024, 1024, kernel_size=1, padding=0, stride=1),
+            nn.ReLU(inplace=True)
+            )
+
+        # Feature extra layers
+        extra_feature_layers = nn.ModuleList([
+            nn.Sequential(
+                # conv8_2
+                nn.Conv2d(1024, 256, kernel_size=1, padding=0, stride=1),
+                nn.ReLU(inplace=True),
+                nn.Conv2d(256, 512, kernel_size=3, padding=1, stride=2),
+                nn.ReLU(inplace=True),
+            ),
+            nn.Sequential(
+                # conv9_2
+                nn.Conv2d(256, 128, kernel_size=1, padding=0, stride=1),
+                nn.ReLU(inplace=True),
+                nn.Conv2d(128, 256, kernel_size=3, padding=1, stride=2),
+                nn.ReLU(inplace=True)
+            ),
+            nn.Sequential(
+                # conv10_2
+                nn.Conv2d(256, 128, kernel_size=1, padding=0, stride=1),
+                nn.ReLU(inplace=True),
+                nn.Conv2d(128, 256, kernel_size=3, padding=1, stride=1),
+                nn.ReLU(inplace=True)
+            ),
+            nn.Sequential(
+                # conv11_2
+                nn.Conv2d(256, 128, kernel_size=1, padding=0, stride=1),
+                nn.ReLU(inplace=True),
+                nn.Conv2d(128, 256, kernel_size=3, padding=1, stride=1)
+            )
+        ])
+
+        extra_feature_layers.insert(0, self.fc)
+        self.extra_feature_layers = extra_feature_layers
 
     def forward(self, x):
-        pass
-
+        y = []
+        for sq in self.extra_feature_layers:
+            import pdb; pdb.set_trace()
+            x = sq(x)
+            y.append(x)
+        return y    
     
