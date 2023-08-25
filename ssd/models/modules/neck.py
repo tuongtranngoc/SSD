@@ -30,7 +30,7 @@ class SSDNeck(nn.Module):
             ),
             nn.Sequential(
                 # conv9_2
-                nn.Conv2d(256, 128, kernel_size=1, padding=0, stride=1),
+                nn.Conv2d(512, 128, kernel_size=1, padding=0, stride=1),
                 nn.ReLU(inplace=True),
                 nn.Conv2d(128, 256, kernel_size=3, padding=1, stride=2),
                 nn.ReLU(inplace=True)
@@ -39,14 +39,14 @@ class SSDNeck(nn.Module):
                 # conv10_2
                 nn.Conv2d(256, 128, kernel_size=1, padding=0, stride=1),
                 nn.ReLU(inplace=True),
-                nn.Conv2d(128, 256, kernel_size=3, padding=1, stride=1),
+                nn.Conv2d(128, 256, kernel_size=3, padding=0, stride=1),
                 nn.ReLU(inplace=True)
             ),
             nn.Sequential(
                 # conv11_2
                 nn.Conv2d(256, 128, kernel_size=1, padding=0, stride=1),
                 nn.ReLU(inplace=True),
-                nn.Conv2d(128, 256, kernel_size=3, padding=1, stride=1)
+                nn.Conv2d(128, 256, kernel_size=3, padding=0, stride=1)
             )
         ])
 
@@ -54,9 +54,8 @@ class SSDNeck(nn.Module):
         self.extra_feature_layers = extra_feature_layers
 
     def forward(self, x):
-        y = []
+        y = [x]
         for sq in self.extra_feature_layers:
-            import pdb; pdb.set_trace()
             x = sq(x)
             y.append(x)
         return y    
