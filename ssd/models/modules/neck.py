@@ -4,11 +4,15 @@ from __future__ import absolute_import
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 
 class SSDNeck(nn.Module):
     def __init__(self, feat_dims) -> None:
         super().__init__()
+        # Parameters used for L2 normalization + rescale
+        self.scale_weight = nn.Parameter(torch.ones(512) * 20)
+
         # FC
         self.fc = nn.Sequential(
             # conv6(FC6)
@@ -54,7 +58,10 @@ class SSDNeck(nn.Module):
         self.extra_feature_layers = extra_feature_layers
 
     def forward(self, x):
-        y = [x]
+        # L2 Normalization + rescale for conv4_3
+        # Reference: L2 NORMALIZATION LAYER (https://arxiv.org/pdf/1506.04579.pdf)
+        l2_x = self.scale_weight.view(1, -1, 1, 1) * F.normalize(x)
+        y = [l2_x]
         for sq in self.extra_feature_layers:
             x = sq(x)
             y.append(x)

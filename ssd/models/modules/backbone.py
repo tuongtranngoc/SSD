@@ -33,8 +33,8 @@ class FeatureExtractorVGG16(nn.Module):
         return nn.Sequential(*layers)
     
     def forward(self, x):
-        x = self.features(x)
-        return x
+        y = self.features(x)
+        return y
     
 
 def build_backbone(arch_name='vgg16', pretrained=True):

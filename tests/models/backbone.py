@@ -6,9 +6,5 @@ def test():
     backbone, _ = build_backbone('vgg16', pretrained=True)
     out = backbone(x)
 
-    import pdb
-    pdb.set_trace()
-
-
 if __name__ == "__main__":
     test()
