@@ -1,12 +1,16 @@
 from easydict import EasyDict
-
+import torch
 
 class Configuration:
     
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
     models = EasyDict({
+        'arch_name': 'vgg16',
+        'pretrained': True,
         'image_size': 300,
+        'fm_channels': [512, 1024, 512, 256, 256, 256]
     })
-
+    
     default_boxes = EasyDict({
         'respect_ratio': [1, 2, 3, 1/2, 1/3],
         's_min': 0.2,
@@ -26,4 +30,23 @@ class Configuration:
     'train_label_path': 'dataset/COCO/annotations/instances_train2017.json',
     'val_img_path': 'dataset/COCO/val2017',
     'val_label_path': 'dataset/COCO/annotations/instances_val2017.json'
+    })
+
+    training = EasyDict({
+        'batch_size': 16,
+        'shuffle': True,
+        'num_workers': 8,
+        'pin_memory': True,
+        'is_augment': True,
+        'lr': 1e-4,
+        'epochs': 150
+    })
+
+
+    valid = EasyDict({
+        'batch_size': 8,
+        'shuffle': False,
+        'num_workers': 8,
+        'pin_memory': True,
+        'is_augment': False
     })

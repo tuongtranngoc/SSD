@@ -14,14 +14,14 @@ from . import cfg
 
 
 class SSDModel(nn.Module):
-    def __init__(self) -> None:
+    def __init__(self, arch_name, pretrained) -> None:
         super().__init__()
-        self.extract_features, feat_dims = build_backbone()
+        self.extract_features, feat_dims = build_backbone(arch_name, pretrained)
         self.neck = SSDNeck(feat_dims)
         self.head = SSDHead(cfg.dataset.num_classes, cfg.models.fm_channels, cfg.default_boxes.dfboxes_sizes)
         
     def forward(self, x):
         x = self.extract_features(x)
         x = self.neck(x)
-        self.head(x)
+        x = self.head(x)
         return x

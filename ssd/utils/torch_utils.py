@@ -5,6 +5,7 @@ from __future__ import absolute_import
 
 import torch
 from . import cfg
+from typing import Tuple, List
 
 class BoxUtils:
     h, w = cfg.models.image_size, cfg.models.image_size
@@ -61,3 +62,21 @@ class BoxUtils:
         bboxes[..., [0, 2]] = bboxes[..., [0, 2]].clamp(min=0.0, max=cls.w)
         bboxes[..., [1, 3]] = bboxes[..., [1, 3]].clamp(min=0.0, max=cls.h)
         return bboxes
+
+
+class DataUtils:
+    
+    @classmethod
+    def to_devices(cls, data):
+        if isinstance(data, torch.Tensor):
+            return data.to(cfg.device)
+        elif isinstance(data, Tuple) or isinstance(data, List):
+            for i, d in enumerate(data):
+                if isinstance(d, torch.Tensor):
+                    data[i] = d.to(cfg.device)
+                else:
+                    Exception(f"{d} in {data} is not a tensor type")
+            return data
+        else:
+            Exception(f"{data} is not a/tuple/list of tensor type")
+

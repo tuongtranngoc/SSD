@@ -73,7 +73,7 @@ class COCODataset(BaseDataset):
         gm = torch.cat((g_cxcy, g_wh), dim=1)
         
         return gm
-
+    
     def __len__(self): return len(self.coco_dataset)
 
     def __getitem__(self, index):

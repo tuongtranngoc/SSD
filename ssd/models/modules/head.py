@@ -35,7 +35,7 @@ class SSDHead(nn.Module):
             cls_out = cls_out.view(N, -1, cfg.dataset.num_classes, H, W)
             cls_out = cls_out.permute(0, 3, 4, 1, 2)
             cls_out = cls_out.reshape(N, -1, cfg.dataset.num_classes)
-
+            
             reg_out = reg_out.view(N, -1, 4, H, W)
             reg_out = reg_out.permute(0, 3, 4, 1, 2)
             reg_out = reg_out.reshape(N, -1, 4)
