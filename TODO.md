@@ -4,7 +4,7 @@
 2. <del>Implement choosing scales and aspect ratios for default boxes
 3. <del>Matching default boxes to ground truth boxes
 4. <del>Implement the loss function
-5. Implement the network
+5. <del>Implement the network
 6. Implement traing and valid with Pytorch Lightning
 7. Tensorboard
 8. Logging
