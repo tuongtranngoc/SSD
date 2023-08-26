@@ -62,8 +62,11 @@ class SSDNeck(nn.Module):
         # Reference: L2 NORMALIZATION LAYER (https://arxiv.org/pdf/1506.04579.pdf)
         l2_x = self.scale_weight.view(1, -1, 1, 1) * F.normalize(x)
         y = [l2_x]
+        z = [l2_x.size(1)]
         for sq in self.extra_feature_layers:
             x = sq(x)
             y.append(x)
-        return y    
+            # import pdb; pdb.set_trace()
+            z.append(x.size(1))
+        return y, z
     
