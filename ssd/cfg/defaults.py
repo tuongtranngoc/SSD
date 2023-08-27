@@ -40,7 +40,7 @@ class Configuration:
         'pin_memory': True,
         'is_augment': True,
         'lr': 1e-4,
-        'epochs': 150
+        'epochs': 150,
     })
 
 
@@ -49,5 +49,20 @@ class Configuration:
         'shuffle': False,
         'num_workers': 8,
         'pin_memory': True,
-        'is_augment': False
+        'is_augment': False,
+        'eval_step': 5,
+    })
+
+    debug = EasyDict({
+        "tensorboard_debug": "exps/tensorboard",
+        "training_debug": "exps/training",
+        "dataset_debug": "exps/dataset",
+        "valid_debug": "exps/valid",
+        "test_cases": "exps/test_cases",
+        "prediction_debug": "exps/prediction",
+        "ckpt_dirpath": "ssd/weights",
+        "conf_debug": 0.3,
+        "idxs_debug": [0, 1, 2, 3, 4, 5, 6, 7],
+        "augmentation_debug": "exps/augmentation",
+        "log_file": "logs/ssd.log",
     })
