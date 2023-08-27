@@ -6,8 +6,8 @@
 4. <del>Implement the loss function
 5. <del>Implement the network
 6. Implement traing and valid with Pytorch Lightning
-7. Tensorboard
-8. Logging
+7. <del>Tensorboard
+8. <del>Logging
 9. dvc, MLFlow
 10. DIOU loss
 11. Export Engines: ONNX, TensorRT, PaddlePaddle
