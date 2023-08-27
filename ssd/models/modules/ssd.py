@@ -14,7 +14,7 @@ from . import cfg
 
 
 class SSDModel(nn.Module):
-    def __init__(self, arch_name, pretrained) -> None:
+    def __init__(self, arch_name='vgg16', pretrained=True) -> None:
         super().__init__()
         self.extract_features, feat_dims = build_backbone(arch_name, pretrained)
         self.neck = SSDNeck(feat_dims)

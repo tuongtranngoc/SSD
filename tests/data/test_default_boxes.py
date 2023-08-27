@@ -1,16 +1,15 @@
 from .. import BoxUtils
 from .. import BaseDataset
-from .. import coco_cfg as cfg
-from .. import default_cfg
+from .. import cfg
 from .. import DefaultBoxesGenerator
 
 import cv2
 
 
 def test():
-    train_dataset = BaseDataset(label_path=cfg.train_label_path, image_path=cfg.train_img_path)
+    train_dataset = BaseDataset(label_path=cfg.dataset.train_label_path, image_path=cfg.dataset.train_img_path)
     ds = train_dataset.load_coco_dataset()
-    fm_sizes = default_cfg.default_boxes.fm_sizes
+    fm_sizes = cfg.default_boxes.fm_sizes
     for i in range(5):
         im_pth, bboxes = ds[i]
         im = cv2.imread(im_pth)

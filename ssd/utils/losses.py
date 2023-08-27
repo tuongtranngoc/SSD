@@ -22,28 +22,24 @@ class SSDLoss(nn.Module):
     def forward(self, targets: Tuple[torch.Tensor, torch.Tensor], predictions: Tuple[torch.Tensor, torch.Tensor]):
         gt_bboxes, gt_labels = targets
         pred_bboxes, pred_labels = predictions
-        gt_bboxes, gt_labels = gt_bboxes.reshape(-1, 4), gt_labels.reshape(-1, 1)
-        pred_bboxes, pred_labels = pred_bboxes.reshape(-1, 4), pred_labels.reshape(-1, 1)
-
-        pos_mask = gt_bboxes.sum(dim=1)>0
-        N = max(1, len(pos_mask))
-
-        pos_gt_labels = gt_labels[pos_mask]
-        neg_gt_labels = gt_labels[~pos_mask]
-
-        pos_pred_labels = pred_labels[pos_mask]
-        neg_pred_labels = pred_labels[~pos_mask]
-
-        loc_loss = F.smooth_l1_loss(gt_bboxes[pos_mask], pred_bboxes[pos_mask], reduction='mean')
-        pos_conf_loss = F.cross_entropy(pos_gt_labels, pos_pred_labels, reduction='mean', label_smoothing=self.label_smooth)
-        neg_conf_loss = F.cross_entropy(neg_gt_labels, neg_pred_labels, reduction='none', label_smoothing=self.label_smooth)
-
-        top_neg_con_loss = self.hard_negative_mining(N, neg_conf_loss).mean()    
-        conf_loss =  self.alpha * (pos_conf_loss + top_neg_con_loss) / N
-        return loc_loss, conf_loss
-
-    def hard_negative_mining(self, num_pos, conf_losses):
-        sorted_conf_losses = torch.sort(conf_losses, dim=0)[0]
-        top_neg_conf_loss = sorted_conf_losses[:num_pos*self.ratio_pos]
-        return top_neg_conf_loss
         
+        # Number of positive
+        num_pos = (gt_bboxes.sum(dim=2) > 0).sum(1, keepdim=True).sum()
+
+        # Numer of negative
+        pos_mask = gt_labels > 0
+        num_neg = pos_mask.sum(1, keepdim=True) * self.ratio_pos
+        
+        box_loss = F.smooth_l1_loss(pred_bboxes[pos_mask], gt_bboxes[pos_mask], reduction='sum')
+        conf_loss = F.cross_entropy(pred_labels.view(-1, cfg.dataset.num_classes), gt_labels.view(-1), reduction='none').view(gt_labels.size())
+
+        # Hard negative mining
+        neg_loss = conf_loss.clone()
+        neg_loss[pos_mask] = -float('inf')
+        _, neg_idx = neg_loss.sort(1, descending=True)
+        background_idxs = neg_idx.sort(1)[1] < num_neg
+        
+        reg_loss = box_loss.sum() / num_pos
+        cls_loss = (conf_loss[pos_mask].sum() + conf_loss[background_idxs].sum()) / num_pos
+
+        return reg_loss, cls_loss

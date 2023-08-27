@@ -26,6 +26,7 @@ class Configuration:
 
     dataset = EasyDict({
     'num_classes': 80,
+    'coco_classes': 'dataset/COCO/coco80.txt',
     'train_img_path': 'dataset/COCO/train2017',
     'train_label_path': 'dataset/COCO/annotations/instances_train2017.json',
     'val_img_path': 'dataset/COCO/val2017',

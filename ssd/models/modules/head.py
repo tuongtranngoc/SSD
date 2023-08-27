@@ -22,7 +22,7 @@ class SSDHead(nn.Module):
             self.reg_boxes.append(
                 nn.Conv2d(num_in, num_out * 4, kernel_size=3, padding=1, stride=1)
             )
-
+        
     def forward(self, x):
         cls_results = []
         reg_results = []
@@ -35,7 +35,7 @@ class SSDHead(nn.Module):
             cls_out = cls_out.view(N, -1, cfg.dataset.num_classes, H, W)
             cls_out = cls_out.permute(0, 3, 4, 1, 2)
             cls_out = cls_out.reshape(N, -1, cfg.dataset.num_classes)
-            
+
             reg_out = reg_out.view(N, -1, 4, H, W)
             reg_out = reg_out.permute(0, 3, 4, 1, 2)
             reg_out = reg_out.reshape(N, -1, 4)
@@ -46,7 +46,7 @@ class SSDHead(nn.Module):
         cls_results = torch.cat(cls_results, dim=1)
         reg_results = torch.cat(reg_results, dim=1)
         
-        return cls_results, reg_results
+        return reg_results, cls_results
         
 
 

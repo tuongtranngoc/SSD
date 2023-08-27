@@ -38,7 +38,3 @@ class Logger:
 
         logger.propagate = False
         return logger
-    
-if __name__ == "__main__":
-    _logger = Logger.get_logger("TRAINING")
-    _logger.info("box_loss: 0.1 - conf_loss: 0.1 - cls_loss: 0.1")

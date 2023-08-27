@@ -2,6 +2,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
 
+import torch.nn.functional as F
 import torch
 import glob
 import cv2
@@ -33,15 +34,16 @@ class COCODataset(BaseDataset):
 
     def matching_defaulboxes(self, bboxes, class_ids):
         bboxes = torch.tensor(bboxes)
-        class_ids = torch.tensor(class_ids, dtype=torch.float32).unsqueeze(1)
+        class_ids = torch.tensor(class_ids, dtype=torch.long)
+
         bboxes = BoxUtils.normalize_box(bboxes)
         defaultboxes_dict = DefaultBoxesGenerator.build_default_boxes()
         defaultboxes = DefaultBoxesGenerator.merge_defaultboxes(defaultboxes_dict)
         defaultboxes = BoxUtils.xcycwh_to_xyxy(defaultboxes)
-
+        
         # Create mask for matched defaultboxes
         dfboxes_mask = torch.zeros_like(defaultboxes)
-        dflabels_mask = torch.zeros(defaultboxes.size(0), dtype=torch.float32).unsqueeze(1)
+        dflabels_mask = torch.zeros(defaultboxes.size(0), dtype=torch.long)
 
         # Matching default boxes to any ground truth box with jaccard overlap higher than a threshold (0.5)
         ious = BoxUtils.pairwise_ious(bboxes, defaultboxes)
@@ -67,13 +69,13 @@ class COCODataset(BaseDataset):
         return dfboxes_mask, dflabels_mask
 
     def simplify_target(self, gt_bboxes, df_bboxes):
-        # Simplify the location
+        # Simplify the location of default boxes
         g_cxcy = (gt_bboxes[..., :2] - df_bboxes[..., :2]) / df_bboxes[..., 2:]
         g_wh = torch.log(gt_bboxes[..., 2:] / df_bboxes[..., 2:])
         gm = torch.cat((g_cxcy, g_wh), dim=1)
         
         return gm
-    
+
     def __len__(self): return len(self.coco_dataset)
 
     def __getitem__(self, index):

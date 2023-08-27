@@ -32,11 +32,11 @@ class Trainer:
         for epoch in range(cfg.training.epochs):
             mt_box_loss = BatchMeter()
             mt_cls_loss = BatchMeter()
-
+                
             for bz, (images, labels) in enumerate(self.train_loader):
                 self.model.train()
-                images = DataUtils.to_devices(images)
-                labels = DataUtils.to_devices(labels)
+                images = DataUtils.to_device(images)
+                labels = DataUtils.to_device(labels)
                 out = self.model(images)
  
                 reg_loss, cls_loss = self.loss_fn(labels, out)

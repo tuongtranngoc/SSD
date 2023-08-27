@@ -1,4 +1,4 @@
-from .. import coco_cfg as cfg
+from .. import cfg
 from .. import BaseDataset
 
 def test():

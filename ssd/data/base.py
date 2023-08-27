@@ -11,6 +11,7 @@ import numpy as np
 from tqdm import tqdm
 from collections import defaultdict
 
+from . import cfg
 from torch.utils.data import Dataset
 
 
@@ -34,6 +35,20 @@ class BaseDataset(Dataset):
         dataset = []
         data = self.get_labels()
 
+        coco_classes = {
+            0 : 'background'
+        }
+        for cat in data['categories']:
+            coco_classes[cat['id']] = cat['name']
+        
+        list_ids = coco_classes.keys()
+
+        new_class_names = defaultdict()
+        with open(cfg.dataset.coco_classes, 'r') as f:
+            for i, l in enumerate(f.readlines()):
+                new_class_names[l.strip()] = i
+        f.close()
+
         images = {
             x['id']: x
             for x in data['images']
@@ -53,14 +68,13 @@ class BaseDataset(Dataset):
             
             bboxes = []
             for ann in anns:
-                if ann['iscrowd']: continue
+                if ann['iscrowd'] or ann['category_id'] not in list_ids: continue
                 bbox = ann['bbox']
                 bbox[2] += bbox[0] 
                 bbox[3] += bbox[1]
-                cate = ann['category_id'] - 1
-                bbox_info = [cate] + bbox
+                cate = ann['category_id']
+                bbox_info = [new_class_names[coco_classes[cate]]] + bbox
                 bboxes.append(bbox_info)
-
             dataset.append([img_path, np.array(bboxes)])
 
         return dataset
