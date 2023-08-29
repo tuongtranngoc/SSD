@@ -24,9 +24,8 @@ class SSDLoss(nn.Module):
         pred_bboxes, pred_labels = predictions
         
         # Number of positive
-        num_pos = (gt_bboxes.sum(dim=2) > 0).sum(1, keepdim=True).sum()
-        
         pos_mask = gt_labels > 0
+        num_pos = pos_mask.sum(1, keepdim=True).sum()
         # Numer of negative
         num_neg = pos_mask.sum(1, keepdim=True) * self.ratio_pos
         

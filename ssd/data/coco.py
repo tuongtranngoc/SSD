@@ -21,28 +21,28 @@ class COCODataset(BaseDataset):
         super().__init__(label_path, image_path)
         self.aug = AlbumAug()
         self.is_augment = is_augment
-        self.transform = Transform(cfg.models.image_size)
+        self._transform_ = Transform(cfg.models.image_size)
         self.coco_dataset = self.load_coco_dataset()
 
     def get_image_label(self, image_pth, bboxes, labels):
         image = cv2.imread(image_pth)
+        image = image[..., ::-1]
         if self.is_augment:
             image, bboxes, labels = self.aug(image, bboxes, labels)
-        image = image[..., ::-1]
-        image, bboxes, labels = self.transform(image, bboxes, labels)
+        image, bboxes, labels = self._transform_(image, bboxes, labels)
         return image, bboxes, labels
 
     def matching_defaulboxes(self, bboxes, class_ids):
-        bboxes = torch.tensor(bboxes)
+        bboxes = torch.tensor(bboxes, dtype=torch.float32)
         class_ids = torch.tensor(class_ids, dtype=torch.long)
-        
+
         bboxes = BoxUtils.normalize_box(bboxes)
         defaultboxes_dict = DefaultBoxesGenerator.build_default_boxes()
         defaultboxes = DefaultBoxesGenerator.merge_defaultboxes(defaultboxes_dict)
         defaultboxes = BoxUtils.xcycwh_to_xyxy(defaultboxes)
         
         # Create mask for matched defaultboxes
-        dfboxes_mask = torch.zeros_like(defaultboxes)
+        dfboxes_mask = torch.zeros_like(defaultboxes, dtype=torch.float32)
         dflabels_mask = torch.zeros(defaultboxes.size(0), dtype=torch.long)
 
         # Matching default boxes to any ground truth box with jaccard overlap higher than a threshold (0.5)
@@ -56,7 +56,7 @@ class COCODataset(BaseDataset):
         
         # Preprocess before computing loss during training the model
         bboxes_pos = bboxes[gt_idx_pos]
-        dflabels_mask[gt_idx_pos] = class_ids[gt_idx_pos]
+        dflabels_mask[dfbox_idx_pos] = class_ids[gt_idx_pos]
         dfbox_pos = defaultboxes[dfbox_idx_pos]
         
         # Convert xyxy to xcyxwh and simplify targets
@@ -65,7 +65,7 @@ class COCODataset(BaseDataset):
 
         dfbox_pos = self.simplify_target(bboxes_pos, dfbox_pos)
         dfboxes_mask[dfbox_idx_pos] = dfbox_pos
-        
+     
         return dfboxes_mask, dflabels_mask
 
     def simplify_target(self, gt_bboxes, df_bboxes):
@@ -73,7 +73,6 @@ class COCODataset(BaseDataset):
         g_cxcy = (gt_bboxes[..., :2] - df_bboxes[..., :2]) / df_bboxes[..., 2:]
         g_wh = torch.log(gt_bboxes[..., 2:] / df_bboxes[..., 2:])
         gm = torch.cat((g_cxcy, g_wh), dim=1)
-        
         return gm
 
     def __len__(self): return len(self.coco_dataset)

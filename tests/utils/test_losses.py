@@ -1,15 +1,12 @@
-from .. import coco_cfg as cfg
-from .. import COCODataset
-from .. import SSDLoss
+from .. import *
 
 import torch
 from torch.utils.data import DataLoader
 
 def test():
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    loss = SSDLoss()
-    train_dataset = COCODataset(label_path=cfg.train_label_path, image_path=cfg.train_img_path, is_augment=False)
-    val_dataset = COCODataset(label_path=cfg.val_label_path, image_path=cfg.val_img_path, is_augment=False)
+    loss = DataUtils.to_device(SSDLoss())
+    train_dataset = COCODataset(label_path=cfg.dataset.train_label_path, image_path=cfg.dataset.train_img_path, is_augment=False)
+    val_dataset = COCODataset(label_path=cfg.dataset.val_label_path, image_path=cfg.dataset.val_img_path, is_augment=False)
     dl = DataLoader(train_dataset, batch_size=20, shuffle=True)
     
     for ims, labels in dl:

@@ -72,6 +72,8 @@ class BaseDataset(Dataset):
                 bbox = ann['bbox']
                 bbox[2] += bbox[0]
                 bbox[3] += bbox[1]
+                if int(bbox[2]) <= int(bbox[0]) or int(bbox[3]) <= int(bbox[1]):
+                    continue
                 cate = ann['category_id']
                 bbox_info = [new_class_names[coco_classes[cate]]] + bbox
                 bboxes.append(bbox_info)

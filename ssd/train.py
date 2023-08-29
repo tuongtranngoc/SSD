@@ -37,7 +37,7 @@ class Trainer:
     def create_model(self):
         self.model = SSDModel(arch_name=cfg.models.arch_name, pretrained=cfg.models.pretrained).to(cfg.device)
         self.loss_fn = SSDLoss()
-        self.optim = torch.optim.AdamW(self.model.parameters(), lr=cfg.training.lr, amsgrad=True)
+        self.optimizer = torch.optim.AdamW(self.model.parameters(), lr=cfg.training.lr, amsgrad=True)
 
         if self.args.resume:
             logger.info("Resuming training ...")
@@ -62,9 +62,9 @@ class Trainer:
                 reg_loss, cls_loss = self.loss_fn(labels, out)
                 total_loss = reg_loss + cls_loss
 
-                self.optim.zero_grad()
+                self.optimizer.zero_grad()
                 total_loss.backward()
-                self.optim.step()
+                self.optimizer.step()
 
                 mt_reg_loss.update(reg_loss.item())
                 mt_cls_loss.update(cls_loss.item())
