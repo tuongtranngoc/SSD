@@ -70,13 +70,13 @@ class BaseDataset(Dataset):
             for ann in anns:
                 if ann['iscrowd'] or ann['category_id'] not in list_ids: continue
                 bbox = ann['bbox']
-                bbox[2] += bbox[0] 
+                bbox[2] += bbox[0]
                 bbox[3] += bbox[1]
                 cate = ann['category_id']
                 bbox_info = [new_class_names[coco_classes[cate]]] + bbox
                 bboxes.append(bbox_info)
             dataset.append([img_path, np.array(bboxes)])
-
+        
         return dataset
 
 

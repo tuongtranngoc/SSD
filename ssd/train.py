@@ -11,8 +11,8 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 
 from . import *
+from .eval import CocoEvaluate
 
-from .utils.logger import Logger
 logger = Logger.get_logger("TRAINING")
 
 
@@ -23,6 +23,7 @@ class Trainer:
         self.best_map = 0.0
         self.create_model()
         self.create_data_loader()
+        self.eval = CocoEvaluate(self.valid_dataset, self.model)
 
     def create_data_loader(self):
         self.train_dataset = COCODataset(cfg.dataset.train_label_path, cfg.dataset.train_img_path, cfg.training.is_augment)
@@ -83,16 +84,16 @@ class Trainer:
                                         reg_loss=metrics["eval_reg_loss"].get_value("mean"),
                                         cls_loss=metrics["eval_cls_loss"].get_value("mean"))
                 
-                Tensorboard.add_scalars("eval_map",
-                                        epoch,
-                                        mAP=metrics["eval_map"].get_value("mean"),
-                                        mAP_50=metrics["eval_map_50"].get_value("mean"),
-                                        mAP_75=metrics["eval_map_75"].get_value("mean"))
-                current_map = metrics["eval_map_50"].get_value("mean")
-                if current_map > self.best_map:
-                    self.best_map = current_map
-                    best_ckpt = os.path.join(cfg.debug.ckpt_dirpath, self.args.model_type, 'best.pt')
-                    self.save_ckpt(best_ckpt, self.best_map, epoch)
+                # Tensorboard.add_scalars("eval_map",
+                #                         epoch,
+                #                         mAP=metrics["eval_map"].get_value("mean"),
+                #                         mAP_50=metrics["eval_map_50"].get_value("mean"),
+                #                         mAP_75=metrics["eval_map_75"].get_value("mean"))
+                # current_map = metrics["eval_map_50"].get_value("mean")
+                # if current_map > self.best_map:
+                #     self.best_map = current_map
+                #     best_ckpt = os.path.join(cfg.debug.ckpt_dirpath, self.args.model_type, 'best.pt')
+                #     self.save_ckpt(best_ckpt, self.best_map, epoch)
 
             last_ckpt = os.path.join(cfg.debug.ckpt_dirpath, self.args.model_type, 'last.pt')
             self.save_ckpt(last_ckpt, self.best_map, epoch)

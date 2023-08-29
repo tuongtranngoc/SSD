@@ -25,14 +25,14 @@ class SSDLoss(nn.Module):
         
         # Number of positive
         num_pos = (gt_bboxes.sum(dim=2) > 0).sum(1, keepdim=True).sum()
-
-        # Numer of negative
+        
         pos_mask = gt_labels > 0
+        # Numer of negative
         num_neg = pos_mask.sum(1, keepdim=True) * self.ratio_pos
         
         box_loss = F.smooth_l1_loss(pred_bboxes[pos_mask], gt_bboxes[pos_mask], reduction='sum')
         conf_loss = F.cross_entropy(pred_labels.view(-1, cfg.dataset.num_classes), gt_labels.view(-1), reduction='none').view(gt_labels.size())
-
+        
         # Hard negative mining
         neg_loss = conf_loss.clone()
         neg_loss[pos_mask] = -float('inf')

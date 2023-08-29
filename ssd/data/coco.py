@@ -35,7 +35,7 @@ class COCODataset(BaseDataset):
     def matching_defaulboxes(self, bboxes, class_ids):
         bboxes = torch.tensor(bboxes)
         class_ids = torch.tensor(class_ids, dtype=torch.long)
-
+        
         bboxes = BoxUtils.normalize_box(bboxes)
         defaultboxes_dict = DefaultBoxesGenerator.build_default_boxes()
         defaultboxes = DefaultBoxesGenerator.merge_defaultboxes(defaultboxes_dict)

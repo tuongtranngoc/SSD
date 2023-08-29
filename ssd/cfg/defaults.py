@@ -34,7 +34,7 @@ class Configuration:
     })
 
     training = EasyDict({
-        'batch_size': 16,
+        'batch_size': 32,
         'shuffle': True,
         'num_workers': 8,
         'pin_memory': True,

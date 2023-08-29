@@ -1,4 +1,6 @@
-import numpy as np
+from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
 
 
 class BatchMeter(object):
@@ -18,7 +20,7 @@ class BatchMeter(object):
         self.sum += value * n
         self.count += n
         self.avg = self.sum / self.count
-    
+        
     def get_value(self, summary_type=None):
         if summary_type == 'mean':
             return self.avg
