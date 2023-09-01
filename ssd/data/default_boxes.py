@@ -15,7 +15,7 @@ class DefaultBoxesGenerator:
     s_max = cfg.default_boxes.s_max
     ratios = cfg.default_boxes.respect_ratio
     im_size = cfg.models.image_size
-
+    
     @classmethod
     def build_default_boxes(cls):
         df_bboxes = defaultdict()
@@ -34,7 +34,7 @@ class DefaultBoxesGenerator:
             xcyc = torch.stack((xc, yc), dim=-1)
             xcyc = xcyc.unsqueeze(2).expand((-1, -1, 6, -1))
             df_bboxes[fm_size][..., :2] = xcyc
-
+            
             wh_ratios = []
             s_k = cls.s_min + (cls.s_max - cls.s_min) * (k - 1) / (len(cls.m) - 1)
             for a_r in cls.ratios:

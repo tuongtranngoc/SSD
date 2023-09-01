@@ -62,12 +62,12 @@ class COCODataset(BaseDataset):
         # Convert xyxy to xcyxwh and simplify targets
         bboxes_pos = BoxUtils.xyxy_to_xcycwh(bboxes_pos)
         dfbox_pos = BoxUtils.xyxy_to_xcycwh(dfbox_pos)
-
+        
         dfbox_pos = self.simplify_target(bboxes_pos, dfbox_pos)
         dfboxes_mask[dfbox_idx_pos] = dfbox_pos
      
         return dfboxes_mask, dflabels_mask
-
+        
     def simplify_target(self, gt_bboxes, df_bboxes):
         # Simplify the location of default boxes
         g_cxcy = (gt_bboxes[..., :2] - df_bboxes[..., :2]) / df_bboxes[..., 2:]

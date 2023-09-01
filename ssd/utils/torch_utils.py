@@ -8,8 +8,8 @@ from . import cfg
 from typing import Tuple, List
 
 class BoxUtils:
-    h, w = cfg.models.image_size, cfg.models.image_size
 
+    h, w = cfg.models.image_size, cfg.models.image_size
     @classmethod
     def xcycwh_to_xyxy(cls, bboxes:torch.Tensor):
         bboxes = bboxes.clone()
@@ -44,7 +44,18 @@ class BoxUtils:
         intersect[intersect.gt(0)] = intersect[intersect.gt(0)] / unions[intersect.gt(0)]
 
         return intersect
-    
+
+    @classmethod
+    def decode_ssd(cls, pred_bboxes: torch.Tensor, dfboxes: torch.Tensor):
+        dfboxes = dfboxes.clone()
+        pred_bboxes = pred_bboxes.clone()
+        # transform offset into cxcywh
+        xcyc = pred_bboxes[..., :2] * dfboxes[..., 2:] + dfboxes[..., :2]
+        wh = pred_bboxes[..., 2:] * torch.exp(pred_bboxes[..., 2:]) * dfboxes[..., 2:]
+        xcycwh = torch.cat((xcyc, wh), dim=1)
+        return xcycwh
+
+
     @classmethod
     def normalize_box(cls, bboxes:torch.Tensor):
         bboxes = bboxes.clone()
@@ -65,7 +76,7 @@ class BoxUtils:
 
 
 class DataUtils:
-
+    
     @classmethod
     def to_device(cls, data):
         if isinstance(data, torch.Tensor):

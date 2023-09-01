@@ -8,7 +8,7 @@ class BatchMeter(object):
     """
     def __init__(self) -> None:
         self.reset()
-
+    
     def reset(self):
         self.avg = 0
         self.sum = 0
