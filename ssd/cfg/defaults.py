@@ -25,20 +25,22 @@ class Configuration:
     })
 
     dataset = EasyDict({
-    'num_classes': 80,
-    'coco_classes': 'dataset/COCO/coco80.txt',
-    'train_img_path': 'dataset/COCO/train2017',
-    'train_label_path': 'dataset/COCO/annotations/instances_train2017.json',
-    'val_img_path': 'dataset/COCO/val2017',
-    'val_label_path': 'dataset/COCO/annotations/instances_val2017.json'
+        'num_classes': 80,
+        'mean': [0.485, 0.456, 0.406], 
+        'std': [0.229, 0.224, 0.225],
+        'coco_classes': 'dataset/COCO/coco80.txt',
+        'train_img_path': 'dataset/COCO/train2017',
+        'train_label_path': 'dataset/COCO/annotations/instances_train2017.json',
+        'val_img_path': 'dataset/COCO/val2017',
+        'val_label_path': 'dataset/COCO/annotations/instances_val2017.json'
     })
 
     training = EasyDict({
         'batch_size': 32,
-        'shuffle': True,
+        'shuffle': False,
         'num_workers': 8,
         'pin_memory': True,
-        'is_augment': True,
+        'is_augment': False,
         'lr': 1e-4,
         'epochs': 150,
     })
@@ -52,7 +54,7 @@ class Configuration:
         'is_augment': False,
         'eval_step': 5,
     })
-
+    
     debug = EasyDict({
         "tensorboard_debug": "exps/tensorboard",
         "training_debug": "exps/training",
@@ -65,4 +67,7 @@ class Configuration:
         "idxs_debug": [0, 1, 2, 3, 4, 5, 6, 7],
         "augmentation_debug": "exps/augmentation",
         "log_file": "logs/ssd.log",
+        "dfboxes": 'exps/dfboxes',
+        "iou_thresh": 0.5,
+        "conf_thresh": 0.6
     })

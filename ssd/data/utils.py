@@ -1,35 +1,32 @@
 import numpy as np
-
 import albumentations as A
 from albumentations.pytorch.transforms import ToTensorV2
 
+from . import *
+
 
 class Transform:
-    def __init__(self, image_size) -> None:
-        self.image_size = image_size
-        self.transform = A.Compose([
-            A.Resize(self.image_size, self.image_size),
-            A.Normalize(),
-            ToTensorV2(),
-        ],
-        bbox_params=A.BboxParams(format='pascal_voc', label_fields=['labels'])
-        )
+    mean = cfg.dataset.mean
+    std = cfg.dataset.std
+    image_size = cfg.models.image_size
+    transform = A.Compose([
+        A.Resize(image_size, image_size),
+        A.Normalize(),
+        ToTensorV2()],
+    bbox_params=A.BboxParams(format='pascal_voc', label_fields=['labels']))
 
-    def __call__(self, image, bboxes, labels):
-        transformed = self.transform(image=image, bboxes=bboxes, labels=labels)
+    @classmethod
+    def transfrom(cls, image, bboxes, labels):
+        transformed = cls.transform(image=image, bboxes=bboxes, labels=labels)
         transformed_image = transformed['image'] 
         transformed_bboxes = np.array(transformed['bboxes'], dtype=np.float32)
         transformed_labels = transformed['labels']
         return transformed_image, transformed_bboxes, transformed_labels
 
-
-class Denormalize:
-    def __init__(self, mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]) -> None:
-        self.mean = np.array(mean, dtype=np.float32)
-        self.std = np.array(std, dtype=np.float32)
-
-    def __call__(self, image):
-        image *= (self.std * 255.)
-        image += (self.mean * 255.)
+    def denormalize(cls, image):
+        mean = np.array(cls.mean, dtype=np.float32)
+        std = np.array(cls.std, dtype=np.float32)
+        image *= (std * 255.)
+        image += (mean * 255.)
         image = np.clip(image, 0, 255.)
         return image

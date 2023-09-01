@@ -2,14 +2,17 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
 
+import os
 import cv2
 import random
-from . import *
 import numpy as np
 from collections import defaultdict
 
+import torch
+from . import *
 
-class Visualization:
+
+class Visualizer:
 
     h, w = cfg.models.image_size, cfg.models.image_size
     thickness = 1
@@ -26,10 +29,8 @@ class Visualization:
 
     @classmethod
     def colors(cls):
-        colors = {
-            k: tuple([random.randint(0, 255) for _ in range(3)])
-            for k in cls.name_id_classes.keys()
-        }
+        colors = { k: tuple([random.randint(0, 255) for _ in range(3)])
+                    for k in cls.name_id_classes.keys()}
         colors['groundtruth'] = (255, 0, 0)
         colors['background'] = (128, 128, 128)
         return colors
@@ -44,7 +45,14 @@ class Visualization:
         return bboxes
 
     @classmethod
-    def draw_object(cls, image, bbox, conf, label,  type_obj=None):
+    def draw_objects(cls, image, bboxes, confs, labels, conf_thresh, type_obj=None):
+        for bbox, conf, label in zip(bboxes, confs, labels):
+            if conf >= conf_thresh:
+                image = cls.single_draw_object(image, bbox, conf, label, type_obj)
+        return image
+
+    @classmethod
+    def single_draw_object(cls, image, bbox, conf, label,  type_obj=None):
         bbox = cls.unnormalize_box(bbox)
         if type_obj == 'GT':
             color = cls.colors['groundtruth']
@@ -70,3 +78,46 @@ class Visualization:
                     lineType=cls.lineType)
         
         return image
+
+    @classmethod
+    def debug_output(cls, dataset, idxs, model, type_fit, debug_dir, apply_nms=True):
+        os.makedirs(os.path.join(debug_dir, type_fit), exist_ok=True)
+        model.eval()
+        images = []
+        targets = []
+        for idx in idxs:
+            image, target = dataset[idx]
+            images.append(image)
+            targets.append(target)
+
+        images = torch.stack(images, dim=0).to(model.device)
+        targets = torch.stack(targets, dim=0).to(model.device)
+
+        preds = model(images) # (N, boxes, 4) & (N, boxes, num classes)
+
+        for i in range(images.size(0)):
+            target_bboxes, target_labels = targets[i]
+            target_confs = torch.ones_like(target_labels, dtype=torch.float32, device=target_labels.device)
+            target_bboxes = BoxUtils.decode_ssd(target_bboxes)
+            target_bboxes = BoxUtils.xcycwh_to_xyxy(target_bboxes)
+            target_bboxes = BoxUtils.denormalize_box(target_bboxes)
+
+            pred_bboxes, pred_confs = preds[i]
+            pred_bboxes = BoxUtils.decode_ssd(pred_bboxes)
+            pred_bboxes = BoxUtils.xcycwh_to_xyxy(pred_bboxes)
+            pred_bboxes = BoxUtils.denormalize_box(pred_bboxes)
+            pred_confs = torch.softmax(pred_confs, dim=1)
+            cates, confs = pred_confs.max(pred_confs, dim=-1)
+
+            if apply_nms:
+                pred_bboxes, confs, cates = BoxUtils.nms(pred_bboxes, cates, confs, cfg.debug.iou_thresh, cfg.debug.conf_thresh)
+
+            target_bboxes, target_confs, target_labels = DataUtils.to_numpy(target_bboxes, target_confs, target_labels)
+            pred_bboxes, confs, cates = DataUtils.to_numpy(pred_bboxes, confs, cates)
+
+            image = DataUtils.image_to_numpy(images[i])
+
+            image = cls.draw_objects(image, target_bboxes, target_confs, target_labels, type_obj='GT')
+            image = cls.draw_objects(image, pred_bboxes, confs, cates, type_obj='PRED')
+
+            cv2.imwrite(os.path.join(debug_dir, type_fit, f'{i}.png'), image)

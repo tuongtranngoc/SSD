@@ -21,7 +21,6 @@ class COCODataset(BaseDataset):
         super().__init__(label_path, image_path)
         self.aug = AlbumAug()
         self.is_augment = is_augment
-        self._transform_ = Transform(cfg.models.image_size)
         self.coco_dataset = self.load_coco_dataset()
 
     def get_image_label(self, image_pth, bboxes, labels):
@@ -29,7 +28,7 @@ class COCODataset(BaseDataset):
         image = image[..., ::-1]
         if self.is_augment:
             image, bboxes, labels = self.aug(image, bboxes, labels)
-        image, bboxes, labels = self._transform_(image, bboxes, labels)
+        image, bboxes, labels = Transform.transform(image, bboxes, labels)
         return image, bboxes, labels
 
     def matching_defaulboxes(self, bboxes, class_ids):
@@ -63,12 +62,12 @@ class COCODataset(BaseDataset):
         bboxes_pos = BoxUtils.xyxy_to_xcycwh(bboxes_pos)
         dfbox_pos = BoxUtils.xyxy_to_xcycwh(dfbox_pos)
         
-        dfbox_pos = self.simplify_target(bboxes_pos, dfbox_pos)
+        dfbox_pos = self.encode_ssd(bboxes_pos, dfbox_pos)
         dfboxes_mask[dfbox_idx_pos] = dfbox_pos
      
         return dfboxes_mask, dflabels_mask
         
-    def simplify_target(self, gt_bboxes, df_bboxes):
+    def encode_ssd(self, gt_bboxes, df_bboxes):
         # Simplify the location of default boxes
         g_cxcy = (gt_bboxes[..., :2] - df_bboxes[..., :2]) / df_bboxes[..., 2:]
         g_wh = torch.log(gt_bboxes[..., 2:] / df_bboxes[..., 2:])

@@ -7,11 +7,12 @@
 5. <del>Implement the network
 6. <del>Tensorboard
 7. <del>Logging
-8. Implement traing and valid with Pytorch Lightning
-9. dvc, MLFlow
-10. DIOU loss
-11. Export Engines: ONNX, TensorRT, PaddlePaddle
-12. Video + Tracking
-13. Model Ensembling
-14. Hyperparameter Evolution
-15. Pruning/Sparsity
+8. Write blog on github.io
+9. Implement traing and valid with Pytorch Lightning
+10. dvc, MLFlow
+11. DIOU loss
+12. Export Engines: ONNX, TensorRT, PaddlePaddle
+13. Video + Tracking
+14. Model Ensembling
+15. Hyperparameter Evolution
+16. Pruning/Sparsity

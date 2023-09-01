@@ -40,8 +40,8 @@ class SSDHead(nn.Module):
             reg_out = reg_out.permute(0, 3, 4, 1, 2)
             reg_out = reg_out.reshape(N, -1, 4)
 
-            cls_results.append(cls_out)
             reg_results.append(reg_out)
+            cls_results.append(cls_out)
 
         cls_results = torch.cat(cls_results, dim=1)
         reg_results = torch.cat(reg_results, dim=1)

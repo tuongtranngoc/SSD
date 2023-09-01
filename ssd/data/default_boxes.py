@@ -15,7 +15,7 @@ class DefaultBoxesGenerator:
     s_max = cfg.default_boxes.s_max
     ratios = cfg.default_boxes.respect_ratio
     im_size = cfg.models.image_size
-    
+        
     @classmethod
     def build_default_boxes(cls):
         df_bboxes = defaultdict()
