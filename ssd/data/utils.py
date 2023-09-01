@@ -23,6 +23,7 @@ class Transform:
         transformed_labels = transformed['labels']
         return transformed_image, transformed_bboxes, transformed_labels
 
+    @classmethod
     def denormalize(cls, image):
         mean = np.array(cls.mean, dtype=np.float32)
         std = np.array(cls.std, dtype=np.float32)
