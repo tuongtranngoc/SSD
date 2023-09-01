@@ -35,14 +35,12 @@ class BaseDataset(Dataset):
         dataset = []
         data = self.get_labels()
 
-        coco_classes = {
-            0 : 'background'
-        }
+        coco_classes = defaultdict()
         for cat in data['categories']:
             coco_classes[cat['id']] = cat['name']
         
         list_ids = coco_classes.keys()
-
+        
         new_class_names = defaultdict()
         with open(cfg.dataset.coco_classes, 'r') as f:
             for i, l in enumerate(f.readlines()):
