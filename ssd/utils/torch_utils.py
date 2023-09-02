@@ -56,7 +56,7 @@ class BoxUtils:
         pred_bboxes = pred_bboxes.clone()
         # transform offset into cxcywh
         xcyc = pred_bboxes[..., :2] * dfboxes[..., 2:] + dfboxes[..., :2]
-        wh = pred_bboxes[..., 2:] * torch.exp(pred_bboxes[..., 2:]) * dfboxes[..., 2:]
+        wh = torch.exp(pred_bboxes[..., 2:]) * dfboxes[..., 2:]
         xcycwh = torch.cat((xcyc, wh), dim=1)
         return xcycwh
 

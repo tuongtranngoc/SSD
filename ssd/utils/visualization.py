@@ -12,30 +12,37 @@ import torch
 from . import *
 
 
-class Visualizer:
-
-    h, w = cfg.models.image_size, cfg.models.image_size
-    thickness = 1
-    lineType = cv2.LINE_AA
-    dfboxes = DefaultBoxesGenerator.build_default_boxes()
-    dfboxes = DefaultBoxesGenerator.merge_defaultboxes(dfboxes)
-    
-    @classmethod
-    def name_id_classes(cls):
-        class_names = defaultdict()
+class COCOAnnotation:
+    """
+    """
+    def __init__(self) -> None:
+        self.class_names = defaultdict()
         with open(cfg.dataset.coco_classes, 'r') as f:
             for i, l in enumerate(f.readlines()):
-                class_names[l.strip()] = i
+                self.class_names[l.strip()] = i
         f.close()
-        return class_names
 
-    @classmethod
-    def class2color(cls, color):
+    def class2color(self, cls_name):
         colors = {k: tuple([random.randint(0, 255) for _ in range(3)])
-                    for k in cls.name_id_classes.keys()}
+                    for k in self.class_names.keys()}
         colors['groundtruth'] = (255, 0, 0)
         colors['background'] = (128, 128, 128)
-        return colors
+        return colors[cls_name]
+
+    def id2class(self, cls_id):
+        ids = {v:k for k, v in self.class_names.items()}
+        return ids[cls_id]
+
+
+class Visualizer:
+    """ Visualize debug images from training and valid
+    """
+    thickness = 1
+    lineType = cv2.LINE_AA
+    coco_ano = COCOAnnotation()
+    h, w = cfg.models.image_size, cfg.models.image_size
+    dfboxes = DefaultBoxesGenerator.build_default_boxes()
+    dfboxes = DefaultBoxesGenerator.merge_defaultboxes(dfboxes).to(cfg.device)
     
     @classmethod
     def unnormalize_box(cls, bboxes:np.ndarray):
@@ -56,12 +63,13 @@ class Visualizer:
     @classmethod
     def single_draw_object(cls, image, bbox, conf, label,  type_obj=None):
         bbox = cls.unnormalize_box(bbox)
+        label = cls.coco_ano.id2class(label)
         if type_obj == 'GT':
-            color = cls.colors['groundtruth']
+            color = cls.coco_ano.class2color('groundtruth')
             text = label
         elif type_obj == 'PRED':
-            color = cls.colors[label]
-            text = '_'.join([label, str(round(conf, 3))])
+            color = cls.coco_ano.class2color(label)
+            text = '-'.join([label, str(round(conf, 3))])
         else:
             Exception(f"Not have type_obj is None")
 
@@ -103,20 +111,24 @@ class Visualizer:
         for i in range(images.size(0)):
             target_bboxes, target_labels = bboxes[i], labels[i]
             target_confs = torch.ones_like(target_labels, dtype=torch.float32, device=cfg.device)
-            target_bboxes = BoxUtils.decode_ssd(target_bboxes, cls.dfboxes)
-            target_bboxes = BoxUtils.xcycwh_to_xyxy(target_bboxes)
-            target_bboxes = BoxUtils.denormalize_box(target_bboxes)
+            pos_mask = target_labels > 0
+            target_bboxes = target_bboxes[pos_mask]
+            target_labels = target_labels[pos_mask]
+            target_confs = target_confs[pos_mask]
+            dfboxes = cls.dfboxes[pos_mask]
             
+            target_bboxes = BoxUtils.decode_ssd(target_bboxes, dfboxes)
+            target_bboxes = BoxUtils.xcycwh_to_xyxy(target_bboxes)
+
             pred_bboxes, pred_confs = bpred_bboxes[i], bpred_confs[i]
             pred_bboxes = BoxUtils.decode_ssd(pred_bboxes, cls.dfboxes)
             pred_bboxes = BoxUtils.xcycwh_to_xyxy(pred_bboxes)
-            pred_bboxes = BoxUtils.denormalize_box(pred_bboxes)
             
             pred_confs = torch.softmax(pred_confs, dim=1)
-            cates, confs = pred_confs.max(dim=-1)
+            confs, cates = pred_confs.max(dim=-1)
 
             if apply_nms:
-                pred_bboxes, confs, cates = BoxUtils.nms(pred_bboxes, cates, confs, cfg.debug.iou_thresh, cfg.debug.conf_thresh)
+                pred_bboxes, confs, cates = BoxUtils.nms(pred_bboxes, confs, cates, cfg.debug.iou_thresh, cfg.debug.conf_thresh)
 
             target_bboxes, target_confs, target_labels = DataUtils.to_numpy(target_bboxes, target_confs, target_labels)
             pred_bboxes, confs, cates = DataUtils.to_numpy(pred_bboxes, confs, cates)

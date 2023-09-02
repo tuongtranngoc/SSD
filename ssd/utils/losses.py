@@ -14,8 +14,7 @@ from . import cfg
 class SSDLoss(nn.Module):
     def __init__(self) -> None:
         super().__init__()
-        self.ratio_pos = cfg.default_boxes.pos_ratio
-        self.ratio_neg = cfg.default_boxes.neg_ratio
+        self.ratio_pos_neg = cfg.default_boxes.ratio_pos_neg
         self.alpha = cfg.default_boxes.alpha
         self.label_smooth = cfg.default_boxes.label_smooth
     
@@ -27,7 +26,7 @@ class SSDLoss(nn.Module):
         pos_mask = gt_labels > 0
         num_pos = pos_mask.sum(1, keepdim=True).sum()
         # Numer of negative
-        num_neg = pos_mask.sum(1, keepdim=True) * self.ratio_pos
+        num_neg = pos_mask.sum(1, keepdim=True) * self.ratio_pos_neg
         
         box_loss = F.smooth_l1_loss(pred_bboxes[pos_mask], gt_bboxes[pos_mask], reduction='sum')
         conf_loss = F.cross_entropy(pred_labels.view(-1, cfg.dataset.num_classes), gt_labels.view(-1), reduction='none').view(gt_labels.size())

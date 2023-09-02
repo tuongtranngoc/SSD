@@ -75,11 +75,6 @@ class Trainer:
                                         epoch,
                                         reg_loss=mt_reg_loss.get_value('mean'),
                                         cls_loss=mt_cls_loss.get_value('mean'))
-                if bz%10 == 0:
-                    # Debug model at each training epoch
-                    with torch.no_grad():
-                        Visualizer.debug_output(self.train_dataset, cfg.debug.idxs_debug, self.model, 
-                                            type_fit='train', debug_dir=cfg.debug.training_debug, apply_nms=True)
                         
             logger.info(f"Epoch: {epoch} - reg_loss: {mt_reg_loss.get_value('mean'): .5f}, cls_loss: {mt_cls_loss.get_value('mean'): .5f}")
 
@@ -89,10 +84,13 @@ class Trainer:
                                         epoch,
                                         reg_loss=metrics["eval_reg_loss"].get_value("mean"),
                                         cls_loss=metrics["eval_cls_loss"].get_value("mean"))
-            
-
+        
             last_ckpt = os.path.join(cfg.debug.ckpt_dirpath, self.args.model_type, 'last.pt')
             self.save_ckpt(last_ckpt, self.best_map, epoch)
+
+            # Debug after each training epoch
+            Visualizer.debug_output(self.train_dataset, cfg.debug.debug_idxs, self.model, 'train', cfg.debug.training_debug, apply_nms=True)
+            #Visualizer.debug_output(self.valid_dataset, cfg.debug.debug_idxs, self.model, 'valid', cfg.debug.valid_debug, apply_nms=True)
 
     def save_ckpt(self, save_path, best_acc, epoch):
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
