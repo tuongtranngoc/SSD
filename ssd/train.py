@@ -75,6 +75,12 @@ class Trainer:
                                         epoch,
                                         reg_loss=mt_reg_loss.get_value('mean'),
                                         cls_loss=mt_cls_loss.get_value('mean'))
+                if bz%10 == 0:
+                    # Debug model at each training epoch
+                    with torch.no_grad():
+                        Visualizer.debug_output(self.train_dataset, cfg.debug.idxs_debug, self.model, 
+                                            type_fit='train', debug_dir=cfg.debug.training_debug, apply_nms=True)
+                        
             logger.info(f"Epoch: {epoch} - reg_loss: {mt_reg_loss.get_value('mean'): .5f}, cls_loss: {mt_cls_loss.get_value('mean'): .5f}")
 
             if epoch % cfg.valid.eval_step == 0:
@@ -83,17 +89,7 @@ class Trainer:
                                         epoch,
                                         reg_loss=metrics["eval_reg_loss"].get_value("mean"),
                                         cls_loss=metrics["eval_cls_loss"].get_value("mean"))
-                
-                # Tensorboard.add_scalars("eval_map",
-                #                         epoch,
-                #                         mAP=metrics["eval_map"].get_value("mean"),
-                #                         mAP_50=metrics["eval_map_50"].get_value("mean"),
-                #                         mAP_75=metrics["eval_map_75"].get_value("mean"))
-                # current_map = metrics["eval_map_50"].get_value("mean")
-                # if current_map > self.best_map:
-                #     self.best_map = current_map
-                #     best_ckpt = os.path.join(cfg.debug.ckpt_dirpath, self.args.model_type, 'best.pt')
-                #     self.save_ckpt(best_ckpt, self.best_map, epoch)
+            
 
             last_ckpt = os.path.join(cfg.debug.ckpt_dirpath, self.args.model_type, 'last.pt')
             self.save_ckpt(last_ckpt, self.best_map, epoch)

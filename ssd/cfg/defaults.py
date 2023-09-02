@@ -25,7 +25,7 @@ class Configuration:
     })
 
     dataset = EasyDict({
-        'num_classes': 80,
+        'num_classes': 81,
         'mean': [0.485, 0.456, 0.406], 
         'std': [0.229, 0.224, 0.225],
         'coco_classes': 'dataset/COCO/coco80.txt',
@@ -63,7 +63,6 @@ class Configuration:
         "test_cases": "exps/test_cases",
         "prediction_debug": "exps/prediction",
         "ckpt_dirpath": "ssd/weights",
-        "conf_debug": 0.3,
         "idxs_debug": [0, 1, 2, 3, 4, 5, 6, 7],
         "augmentation_debug": "exps/augmentation",
         "log_file": "logs/ssd.log",

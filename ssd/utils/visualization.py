@@ -17,7 +17,9 @@ class Visualizer:
     h, w = cfg.models.image_size, cfg.models.image_size
     thickness = 1
     lineType = cv2.LINE_AA
-
+    dfboxes = DefaultBoxesGenerator.build_default_boxes()
+    dfboxes = DefaultBoxesGenerator.merge_defaultboxes(dfboxes)
+    
     @classmethod
     def name_id_classes(cls):
         class_names = defaultdict()
@@ -28,8 +30,8 @@ class Visualizer:
         return class_names
 
     @classmethod
-    def colors(cls):
-        colors = { k: tuple([random.randint(0, 255) for _ in range(3)])
+    def class2color(cls, color):
+        colors = {k: tuple([random.randint(0, 255) for _ in range(3)])
                     for k in cls.name_id_classes.keys()}
         colors['groundtruth'] = (255, 0, 0)
         colors['background'] = (128, 128, 128)
@@ -84,30 +86,34 @@ class Visualizer:
         os.makedirs(os.path.join(debug_dir, type_fit), exist_ok=True)
         model.eval()
         images = []
-        targets = []
+        bboxes = []
+        labels = []
         for idx in idxs:
             image, target = dataset[idx]
             images.append(image)
-            targets.append(target)
+            bboxes.append(target[0])
+            labels.append(target[1])
+        
+        images = torch.stack(images, dim=0).to(cfg.device)
+        bboxes = torch.stack(bboxes, dim=0).to(cfg.device)
+        labels = torch.stack(labels, dim=0).to(cfg.device)
 
-        images = torch.stack(images, dim=0).to(model.device)
-        targets = torch.stack(targets, dim=0).to(model.device)
-
-        preds = model(images) # (N, boxes, 4) & (N, boxes, num classes)
+        bpred_bboxes, bpred_confs = model(images) # (N, boxes, 4) & (N, boxes, num classes)
 
         for i in range(images.size(0)):
-            target_bboxes, target_labels = targets[i]
-            target_confs = torch.ones_like(target_labels, dtype=torch.float32, device=target_labels.device)
-            target_bboxes = BoxUtils.decode_ssd(target_bboxes)
+            target_bboxes, target_labels = bboxes[i], labels[i]
+            target_confs = torch.ones_like(target_labels, dtype=torch.float32, device=cfg.device)
+            target_bboxes = BoxUtils.decode_ssd(target_bboxes, cls.dfboxes)
             target_bboxes = BoxUtils.xcycwh_to_xyxy(target_bboxes)
             target_bboxes = BoxUtils.denormalize_box(target_bboxes)
-
-            pred_bboxes, pred_confs = preds[i]
-            pred_bboxes = BoxUtils.decode_ssd(pred_bboxes)
+            
+            pred_bboxes, pred_confs = bpred_bboxes[i], bpred_confs[i]
+            pred_bboxes = BoxUtils.decode_ssd(pred_bboxes, cls.dfboxes)
             pred_bboxes = BoxUtils.xcycwh_to_xyxy(pred_bboxes)
             pred_bboxes = BoxUtils.denormalize_box(pred_bboxes)
+            
             pred_confs = torch.softmax(pred_confs, dim=1)
-            cates, confs = pred_confs.max(pred_confs, dim=-1)
+            cates, confs = pred_confs.max(dim=-1)
 
             if apply_nms:
                 pred_bboxes, confs, cates = BoxUtils.nms(pred_bboxes, cates, confs, cfg.debug.iou_thresh, cfg.debug.conf_thresh)
@@ -117,7 +123,7 @@ class Visualizer:
 
             image = DataUtils.image_to_numpy(images[i])
 
-            image = cls.draw_objects(image, target_bboxes, target_confs, target_labels, type_obj='GT')
-            image = cls.draw_objects(image, pred_bboxes, confs, cates, type_obj='PRED')
+            image = cls.draw_objects(image, target_bboxes, target_confs, target_labels, cfg.debug.conf_thresh, type_obj='GT')
+            image = cls.draw_objects(image, pred_bboxes, confs, cates, cfg.debug.conf_thresh, type_obj='PRED')
 
             cv2.imwrite(os.path.join(debug_dir, type_fit, f'{i}.png'), image)

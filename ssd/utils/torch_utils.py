@@ -52,6 +52,7 @@ class BoxUtils:
     @classmethod
     def decode_ssd(cls, pred_bboxes: torch.Tensor, dfboxes: torch.Tensor):
         dfboxes = dfboxes.clone()
+        dfboxes = dfboxes.to(pred_bboxes.device)
         pred_bboxes = pred_bboxes.clone()
         # transform offset into cxcywh
         xcyc = pred_bboxes[..., :2] * dfboxes[..., 2:] + dfboxes[..., :2]
@@ -78,7 +79,7 @@ class BoxUtils:
         return bboxes
     
     @classmethod
-    def nms(pred_bboxes, pred_confs, pred_classes, iou_thresh, conf_thresh):
+    def nms(cls, pred_bboxes, pred_confs, pred_classes, iou_thresh, conf_thresh):
         conf_mask = torch.where(pred_confs>=conf_thresh)[0]
         pred_bboxes = pred_bboxes[conf_mask]
         pred_confs = pred_confs[conf_mask]
@@ -125,6 +126,15 @@ class DataUtils:
             return data
         else:
             raise Exception(f"{data} is a type of {type(data)}, not numpy/tensor type")
+    
+    @classmethod
+    def denormalize(cls, image):
+        mean = np.array(cfg.dataset.mean, dtype=np.float32)
+        std = np.array(cfg.dataset.std, dtype=np.float32)
+        image *= (std * 255.)
+        image += (mean * 255.)
+        image = np.clip(image, 0, 255.)
+        return image
         
     @classmethod
     def image_to_numpy(cls, image):
@@ -133,7 +143,7 @@ class DataUtils:
                 image = image.squeeze()
             image = image.detach().cpu().numpy()
             image = image.transpose((1, 2, 0))
-            image = Transform.denormalize(image)
+            image = cls.denormalize(image)
             image = np.ascontiguousarray(image, np.uint8)
             image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
             return image

@@ -11,7 +11,7 @@ import os
 from .default_boxes import DefaultBoxesGenerator
 from .augmentations import AlbumAug
 from .base import BaseDataset
-from .utils import Transform
+from .utils import Transformation
 from . import BoxUtils
 from . import cfg
 
@@ -22,13 +22,14 @@ class COCODataset(BaseDataset):
         self.aug = AlbumAug()
         self.is_augment = is_augment
         self.coco_dataset = self.load_coco_dataset()
+        self.__tranform = Transformation()
 
     def get_image_label(self, image_pth, bboxes, labels):
         image = cv2.imread(image_pth)
         image = image[..., ::-1]
         if self.is_augment:
             image, bboxes, labels = self.aug(image, bboxes, labels)
-        image, bboxes, labels = Transform.transform(image, bboxes, labels)
+        image, bboxes, labels = self.__tranform.transform(image, bboxes, labels)
         return image, bboxes, labels
 
     def matching_defaulboxes(self, bboxes, class_ids):
@@ -43,7 +44,7 @@ class COCODataset(BaseDataset):
         # Create mask for matched defaultboxes
         dfboxes_mask = torch.zeros_like(defaultboxes, dtype=torch.float32)
         dflabels_mask = torch.zeros(defaultboxes.size(0), dtype=torch.long)
-
+        
         # Matching default boxes to any ground truth box with jaccard overlap higher than a threshold (0.5)
         ious = BoxUtils.pairwise_ious(bboxes, defaultboxes)
         max_ious, max_idxs = ious.max(dim=0)
