@@ -90,7 +90,7 @@ class Trainer:
 
             # Debug after each training epoch
             Visualizer.debug_output(self.train_dataset, cfg.debug.idxs_debug, self.model, 'train', cfg.debug.training_debug, apply_nms=True)
-            #Visualizer.debug_output(self.valid_dataset, cfg.debug.debug_idxs, self.model, 'valid', cfg.debug.valid_debug, apply_nms=True)
+            Visualizer.debug_output(self.valid_dataset, cfg.debug.debug_idxs, self.model, 'valid', cfg.debug.valid_debug, apply_nms=True)
 
     def save_ckpt(self, save_path, best_acc, epoch):
         os.makedirs(os.path.dirname(save_path), exist_ok=True)

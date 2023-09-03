@@ -22,13 +22,13 @@ class COCOAnnotation:
             for i, l in enumerate(f.readlines()):
                 self.class_names[l.strip()] = i
         f.close()
+        self.colors = {k: tuple([random.randint(0, 255) for _ in range(3)])
+                    for k in self.class_names.keys()}
 
     def class2color(self, cls_name):
-        colors = {k: tuple([random.randint(0, 255) for _ in range(3)])
-                    for k in self.class_names.keys()}
-        colors['groundtruth'] = (255, 0, 0)
-        colors['background'] = (128, 128, 128)
-        return colors[cls_name]
+        self.colors['groundtruth'] = (255, 0, 0)
+        self.colors['background'] = (128, 128, 128)
+        return self.colors[cls_name]
 
     def id2class(self, cls_id):
         ids = {v:k for k, v in self.class_names.items()}
@@ -127,7 +127,7 @@ class Visualizer:
             
             pred_confs = F.softmax(pred_confs, dim=-1)
             confs, cates = pred_confs.max(dim=-1)
-    
+            
             if apply_nms:
                 pred_bboxes, confs, cates = BoxUtils.nms(pred_bboxes, confs, cates, cfg.debug.iou_thresh, cfg.debug.conf_thresh)
 
