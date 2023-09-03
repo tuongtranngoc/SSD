@@ -25,18 +25,11 @@ class COCODataset(BaseDataset):
         self.coco_dataset = self.load_coco_dataset()
         self.__tranform = Transformation()
 
-    def handle_no_object(self, bboxes, labels):
-        if bboxes.shape[0] == 0:
-            bboxes = np.array([0, 0, 0, 0])
-            labels = np.array([0])
-        return bboxes, labels
-
     def get_image_label(self, image_pth, bboxes, labels):
         image = cv2.imread(image_pth)
         image = image[..., ::-1]
         if self.is_augment:
             image, bboxes, labels = self.aug(image, bboxes, labels)
-        bboxes, labels = self.handle_no_object(bboxes, labels)
         image, bboxes, labels = self.__tranform.transform(image, bboxes, labels)
         return image, bboxes, labels
 
