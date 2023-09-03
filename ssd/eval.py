@@ -48,7 +48,7 @@ class CocoEvaluate:
                 labels = DataUtils.to_device(labels)
                 out = self.model(images)
                 bz = images.size(0)
-                reg_loss, cls_loss = self.loss_fun(labels.clone(), out)
+                reg_loss, cls_loss = self.loss_fun(labels, out)
 
                 metrics["eval_reg_loss"].update(reg_loss)
                 metrics["eval_cls_loss"].update(cls_loss)
