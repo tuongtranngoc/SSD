@@ -30,5 +30,5 @@ class AlbumAug:
         transformed_bboxes = np.array(transformed['bboxes'], dtype=np.float32)
         transformed_labels = transformed['labels']
         if transformed_bboxes.shape[0] == 0:
-            image, bboxes, labels
+            return image, bboxes, labels
         return transformed_image, transformed_bboxes, transformed_labels
