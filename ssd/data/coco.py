@@ -3,6 +3,7 @@ from __future__ import print_function
 from __future__ import absolute_import
 
 import torch.nn.functional as F
+import numpy as np
 import torch
 import glob
 import cv2
@@ -24,16 +25,23 @@ class COCODataset(BaseDataset):
         self.coco_dataset = self.load_coco_dataset()
         self.__tranform = Transformation()
 
+    def handle_no_object(self, bboxes, labels):
+        if bboxes.shape[0] == 0:
+            bboxes = np.array([0, 0, 0, 0])
+            labels = np.array([0])
+        return bboxes, labels
+
     def get_image_label(self, image_pth, bboxes, labels):
         image = cv2.imread(image_pth)
         image = image[..., ::-1]
         if self.is_augment:
             image, bboxes, labels = self.aug(image, bboxes, labels)
+        bboxes, labels = self.handle_no_object(bboxes, labels)
         image, bboxes, labels = self.__tranform.transform(image, bboxes, labels)
         return image, bboxes, labels
 
     def matching_defaulboxes(self, bboxes, class_ids):
-        bboxes = torch.tensor(bboxes, dtype=torch.float32)
+        bboxes = torch.tensor(bboxes.copy(), dtype=torch.float32)
         class_ids = torch.tensor(class_ids, dtype=torch.long)
 
         bboxes = BoxUtils.normalize_box(bboxes)
@@ -65,7 +73,7 @@ class COCODataset(BaseDataset):
         
         dfbox_pos = self.encode_ssd(bboxes_pos, dfbox_pos)
         dfboxes_mask[dfbox_idx_pos] = dfbox_pos
-     
+
         return dfboxes_mask, dflabels_mask
         
     def encode_ssd(self, gt_bboxes, df_bboxes):
@@ -78,8 +86,8 @@ class COCODataset(BaseDataset):
     def __len__(self): return len(self.coco_dataset)
 
     def __getitem__(self, index):
-        image_pth, lables = self.coco_dataset[index]
-        class_ids, bboxes = lables[:, 0], lables[:, 1:]
+        image_pth, labels = self.coco_dataset[index]
+        class_ids, bboxes = labels[:, 0], labels[:, 1:]
         image, bboxes, class_ids = self.get_image_label(image_pth, bboxes, class_ids)
         targets = self.matching_defaulboxes(bboxes, class_ids)
         return image, targets

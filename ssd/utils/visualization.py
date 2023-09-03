@@ -10,10 +10,11 @@ from collections import defaultdict
 
 import torch
 from . import *
+import torch.nn.functional as F
 
 
 class COCOAnnotation:
-    """
+    """COCO Annotation: color, class ids
     """
     def __init__(self) -> None:
         self.class_names = defaultdict()
@@ -124,9 +125,9 @@ class Visualizer:
             pred_bboxes = BoxUtils.decode_ssd(pred_bboxes, cls.dfboxes)
             pred_bboxes = BoxUtils.xcycwh_to_xyxy(pred_bboxes)
             
-            pred_confs = torch.softmax(pred_confs, dim=1)
+            pred_confs = F.softmax(pred_confs, dim=-1)
             confs, cates = pred_confs.max(dim=-1)
-
+    
             if apply_nms:
                 pred_bboxes, confs, cates = BoxUtils.nms(pred_bboxes, confs, cates, cfg.debug.iou_thresh, cfg.debug.conf_thresh)
 

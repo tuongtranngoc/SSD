@@ -21,7 +21,7 @@ class AlbumAug:
             A.MedianBlur(p=0.01, blur_limit=5),
             A.RandomBrightnessContrast(p=0.3),
             ],
-        bbox_params=A.BboxParams(format='pascal_voc', label_fields=['labels'], min_visibility=0.1),
+        bbox_params=A.BboxParams(format='pascal_voc', label_fields=['labels'], min_visibility=0.3),
         )
     
     def __call__(self, image, bboxes, labels):

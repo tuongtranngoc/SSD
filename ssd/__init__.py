@@ -6,4 +6,4 @@ from ssd.utils.metrics import BatchMeter
 from ssd.utils.torch_utils import DataUtils, BoxUtils
 from ssd.utils.tensorboard import Tensorboard
 from ssd.utils.logger import Logger
-from ssd.utils.visualization import Visualizer
+from ssd.utils.visualization import Visualizer, COCOAnnotation

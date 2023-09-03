@@ -36,10 +36,10 @@ class Configuration:
 
     training = EasyDict({
         'batch_size': 32,
-        'shuffle': False,
+        'shuffle': True,
         'num_workers': 8,
         'pin_memory': True,
-        'is_augment': False,
+        'is_augment': True,
         'lr': 1e-4,
         'epochs': 150,
     })

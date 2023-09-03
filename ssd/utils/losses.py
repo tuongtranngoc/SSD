@@ -14,8 +14,8 @@ from . import cfg
 class SSDLoss(nn.Module):
     def __init__(self) -> None:
         super().__init__()
-        self.ratio_pos_neg = cfg.default_boxes.ratio_pos_neg
         self.alpha = cfg.default_boxes.alpha
+        self.ratio_pos_neg = cfg.default_boxes.ratio_pos_neg
         self.label_smooth = cfg.default_boxes.label_smooth
     
     def forward(self, targets: Tuple[torch.Tensor, torch.Tensor], predictions: Tuple[torch.Tensor, torch.Tensor]):
@@ -36,6 +36,8 @@ class SSDLoss(nn.Module):
         neg_loss[pos_mask] = -float('inf')
         _, neg_idx = neg_loss.sort(1, descending=True)
         background_idxs = neg_idx.sort(1)[1] < num_neg
+        
+        num_pos = max(1, num_pos)
         
         reg_loss = box_loss.sum() / num_pos
         cls_loss = (conf_loss[pos_mask].sum() + conf_loss[background_idxs].sum()) / num_pos
