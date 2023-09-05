@@ -17,7 +17,7 @@ class SSDLoss(nn.Module):
         self.alpha = cfg.default_boxes.alpha
         self.ratio_pos_neg = cfg.default_boxes.ratio_pos_neg
         self.label_smooth = cfg.default_boxes.label_smooth
-    
+
     def forward(self, targets: Tuple[torch.Tensor, torch.Tensor], predictions: Tuple[torch.Tensor, torch.Tensor]):
         gt_bboxes, gt_labels = targets
         pred_bboxes, pred_labels = predictions

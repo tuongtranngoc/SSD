@@ -26,7 +26,7 @@ class AnnotationTool:
                     for k in self.class_names.keys()}
 
     def class2color(self, cls_name):
-        self.colors['groundtruth'] = (255, 0, 0)
+        self.colors['groundtruth'] = (0, 0, 255)
         self.colors['background'] = (128, 128, 128)
         return self.colors[cls_name]
 
@@ -40,7 +40,7 @@ class Visualizer:
     """
     thickness = 1
     lineType = cv2.LINE_AA
-    coco_ano = AnnotationTool()
+    cvt_ano = AnnotationTool()
     h, w = cfg.models.image_size, cfg.models.image_size
     dfboxes = DefaultBoxesGenerator.build_default_boxes()
     dfboxes = DefaultBoxesGenerator.merge_defaultboxes(dfboxes).to(cfg.device)
@@ -65,12 +65,12 @@ class Visualizer:
     def single_draw_object(cls, image, bbox, conf, label,  type_obj=None):
         if label == 0: return image
         bbox = cls.unnormalize_box(bbox)
-        label = cls.coco_ano.id2class(label)
+        label = cls.cvt_ano.id2class(label)
         if type_obj == 'GT':
-            color = cls.coco_ano.class2color('groundtruth')
+            color = cls.cvt_ano.class2color('groundtruth')
             text = label
         elif type_obj == 'PRED':
-            color = cls.coco_ano.class2color(label)
+            color = cls.cvt_ano.class2color(label)
             text = '-'.join([label, str(round(conf, 3))])
         else:
             Exception(f"Not have type_obj is None")
@@ -113,12 +113,15 @@ class Visualizer:
         for i in range(images.size(0)):
             target_bboxes, target_labels = bboxes[i], labels[i]
             target_confs = torch.ones_like(target_labels, dtype=torch.float32, device=cfg.device)
+
+            # Filter negative targets
             pos_mask = target_labels > 0
             target_bboxes = target_bboxes[pos_mask]
             target_labels = target_labels[pos_mask]
             target_confs = target_confs[pos_mask]
             dfboxes = cls.dfboxes[pos_mask]
             
+            # Decode bboxes
             target_bboxes = BoxUtils.decode_ssd(target_bboxes, dfboxes)
             target_bboxes = BoxUtils.xcycwh_to_xyxy(target_bboxes)
 
@@ -126,17 +129,23 @@ class Visualizer:
             pred_bboxes = BoxUtils.decode_ssd(pred_bboxes, cls.dfboxes)
             pred_bboxes = BoxUtils.xcycwh_to_xyxy(pred_bboxes)
             
-            pred_confs = F.softmax(pred_confs, dim=-1)
+            pred_confs = torch.softmax(pred_confs, dim=-1)
             confs, cates = pred_confs.max(dim=-1)
+
+            # Filter negative predictions
+            pred_pos_mask = cates > 0
+            pred_bboxes = pred_bboxes[pred_pos_mask]
+            confs = confs[pred_pos_mask]
+            cates = cates[pred_pos_mask]
             
+            # Apply non-max suppression
             if apply_nms:
                 pred_bboxes, confs, cates = BoxUtils.nms(pred_bboxes, confs, cates, cfg.debug.iou_thresh, cfg.debug.conf_thresh)
-            
+            # Tensor to numpy
             target_bboxes, target_confs, target_labels = DataUtils.to_numpy(target_bboxes, target_confs, target_labels)
             pred_bboxes, confs, cates = DataUtils.to_numpy(pred_bboxes, confs, cates)
-            
             image = DataUtils.image_to_numpy(images[i])
-
+            # Draw debug images
             image = cls.draw_objects(image, target_bboxes, target_confs, target_labels, cfg.debug.conf_thresh, type_obj='GT')
             image = cls.draw_objects(image, pred_bboxes, confs, cates, cfg.debug.conf_thresh, type_obj='PRED')
 

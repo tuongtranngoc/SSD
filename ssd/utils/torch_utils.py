@@ -84,7 +84,7 @@ class BoxUtils:
         pred_bboxes = pred_bboxes[conf_mask]
         pred_confs = pred_confs[conf_mask]
         pred_classes = pred_classes[conf_mask]
-
+    
         idxs = torchvision.ops.nms(pred_bboxes, pred_confs, iou_thresh)
         nms_bboxes = pred_bboxes[idxs]
         nms_confs = pred_confs[idxs]
