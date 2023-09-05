@@ -42,8 +42,7 @@ class Visualizer:
     lineType = cv2.LINE_AA
     cvt_ano = AnnotationTool()
     h, w = cfg.models.image_size, cfg.models.image_size
-    dfboxes = DefaultBoxesGenerator.build_default_boxes()
-    dfboxes = DefaultBoxesGenerator.merge_defaultboxes(dfboxes).to(cfg.device)
+    dfboxes = DefaultBoxesGenerator.default_boxes.to(cfg.device)
     
     @classmethod
     def unnormalize_box(cls, bboxes:np.ndarray):
@@ -113,7 +112,7 @@ class Visualizer:
         for i in range(images.size(0)):
             target_bboxes, target_labels = bboxes[i], labels[i]
             target_confs = torch.ones_like(target_labels, dtype=torch.float32, device=cfg.device)
-
+            
             # Filter negative targets
             pos_mask = target_labels > 0
             target_bboxes = target_bboxes[pos_mask]

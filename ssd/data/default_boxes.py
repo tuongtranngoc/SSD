@@ -59,9 +59,9 @@ class DefaultBoxesGenerator:
         for fm, dfbox in dfboxes_dict.items():
             dfbox = dfbox.reshape(-1, 4)
             default_boxes.append(dfbox)
-        default_boxes = torch.cat(default_boxes, dim=0)
-        return default_boxes
+        cls.default_boxes = torch.cat(default_boxes, dim=0)
+        return cls.default_boxes
 
 
-if __name__ == "__main__":
-    DefaultBoxesGenerator.build_default_boxes()    
+dfboxes = DefaultBoxesGenerator.build_default_boxes()
+DefaultBoxesGenerator.merge_defaultboxes(dfboxes)

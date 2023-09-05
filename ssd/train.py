@@ -20,7 +20,7 @@ class Trainer:
     def __init__(self, args) -> None:
         self.args = args
         self.start_epoch = 1
-        self.best_map = 0.0
+        self.best_map50 = 0.0
         self.create_model()
         self.create_data_loader()
         self.eval = SSDEvaluate(self.valid_dataset, self.model)
@@ -84,9 +84,22 @@ class Trainer:
                                         epoch,
                                         reg_loss=metrics["eval_reg_loss"].get_value("mean"),
                                         cls_loss=metrics["eval_cls_loss"].get_value("mean"))
+                
+                Tensorboard.add_scalars("eval_mAP",
+                                        epoch,
+                                        map=metrics["eval_map"].get_value("mean"),
+                                        map_50=metrics["eval_map_50"].get_value("mean"),
+                                        map_75=metrics["eval_map_75"].get_value("mean"))
+                
+                current_map50 = metrics["eval_map_50"].get_value("mean")
+                if current_map50 > self.best_map50:
+                    self.best_map50 = current_map50
+                    best_cpkt_pth = os.path.join(cfg.debug.ckpt_dirpath, self.args.model_type, 'best.pt')
+                    self.save_ckpt(best_cpkt_pth, self.best_map50, epoch)
+            
         
             last_ckpt = os.path.join(cfg.debug.ckpt_dirpath, self.args.model_type, 'last.pt')
-            self.save_ckpt(last_ckpt, self.best_map, epoch)
+            self.save_ckpt(last_ckpt, self.best_map50, epoch)
 
             # Debug after each training epoch
             Visualizer.debug_output(self.train_dataset, cfg.debug.idxs_debug, self.model, 'train', cfg.debug.training_debug, apply_nms=True)
@@ -104,7 +117,7 @@ class Trainer:
         torch.save(ckpt_dict, save_path)
 
     def resume_training(self, ckpt):
-        self.best_map = ckpt['best_map50']
+        self.best_map50 = ckpt['best_map50']
         start_epoch = ckpt['epoch'] + 1
         self.optimizer.load_state_dict(ckpt['optimizer'])
         self.model.load_state_dict(ckpt['model'])

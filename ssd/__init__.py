@@ -8,3 +8,4 @@ from ssd.utils.torch_utils import DataUtils, BoxUtils
 from ssd.utils.tensorboard import Tensorboard
 from ssd.utils.logger import Logger
 from ssd.utils.visualization import Visualizer, AnnotationTool
+from ssd.data.default_boxes import DefaultBoxesGenerator
