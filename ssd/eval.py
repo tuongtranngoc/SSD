@@ -59,8 +59,8 @@ class SSDEvaluate:
                 bpred_bboxes, bpred_confs = out
 
                 for j in range(bz):
-                    target_confs = torch.ones_like(target_labels, dtype=torch.float32, device=cfg.device)
                     target_bboxes, target_labels = btarget_bboxes[j], btarget_labels[j]
+                    target_confs = torch.ones_like(target_labels, dtype=torch.float32, device=cfg.device)
                     pred_bboxes, pred_confs = bpred_bboxes[j], bpred_confs[j]
                     # Filter negative targets
                     target_pos_mask = target_labels > 0
