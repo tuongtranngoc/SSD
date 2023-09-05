@@ -45,7 +45,7 @@ class Trainer:
             if os.path.exists(last_ckpt):
                 ckpt = torch.load(last_ckpt, map_location=cfg.device)
                 self.start_epoch = self.resume_training(ckpt)
-                logger.info(f"Loading checkpoint with start epoch: {self.start_epoch}, best mAP_50: {self.best_map}")
+                logger.info(f"Loading checkpoint with start epoch: {self.start_epoch}, best mAP_50: {self.best_map50}")
 
     
     def train(self):
@@ -58,7 +58,7 @@ class Trainer:
                 images = DataUtils.to_device(images)
                 labels = DataUtils.to_device(labels)
                 out = self.model(images)
- 
+
                 reg_loss, cls_loss = self.loss_fn(labels, out)
                 total_loss = reg_loss + cls_loss
 
@@ -91,13 +91,14 @@ class Trainer:
                                         map_50=metrics["eval_map_50"].get_value("mean"),
                                         map_75=metrics["eval_map_75"].get_value("mean"))
                 
+                # Save best checkpoint
                 current_map50 = metrics["eval_map_50"].get_value("mean")
                 if current_map50 > self.best_map50:
                     self.best_map50 = current_map50
                     best_cpkt_pth = os.path.join(cfg.debug.ckpt_dirpath, self.args.model_type, 'best.pt')
                     self.save_ckpt(best_cpkt_pth, self.best_map50, epoch)
-            
-        
+
+            # Save last checkpoint
             last_ckpt = os.path.join(cfg.debug.ckpt_dirpath, self.args.model_type, 'last.pt')
             self.save_ckpt(last_ckpt, self.best_map50, epoch)
 

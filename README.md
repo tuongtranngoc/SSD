@@ -17,6 +17,7 @@
 | Backbone | Dataset | Training dataset | Valid dataset | Image size | mAP | mAP_50 | mAP_75 |
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 |Original paper|PASCAL VOC|trainval 2007+2012|test2007|300x300|--|--|--|
+|VGG16|PASCAL VOC|trainval 2007+2012|test2007|300x300|--|--|--|
 |ResNet34|PASCAL VOC|trainval 2007+2012|test2007|300x300|--|--|--|
 |ResNet50|PASCAL VOC|trainval 2007+2012|test2007|300x300|--|--|--|
 
