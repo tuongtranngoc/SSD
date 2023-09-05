@@ -13,7 +13,7 @@ class Transformation:
             A.Normalize(),
             ToTensorV2()],
         bbox_params=A.BboxParams(format='pascal_voc', label_fields=['labels']))
-
+    
     def transform(self, image, bboxes, labels):
         transformed = self.transformation(image=image, bboxes=bboxes, labels=labels)
         transformed_image = transformed['image'] 

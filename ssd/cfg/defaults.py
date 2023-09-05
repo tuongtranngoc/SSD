@@ -23,15 +23,26 @@ class Configuration:
         'label_smooth': 0.1,
     })
 
-    dataset = EasyDict({
+    coco_dataset = EasyDict({
         'num_classes': 81,
         'mean': [0.485, 0.456, 0.406], 
         'std': [0.229, 0.224, 0.225],
-        'coco_classes': 'dataset/COCO/coco80.txt',
+        'classes': 'dataset/COCO/coco80.txt',
         'train_img_path': 'dataset/COCO/train2017',
         'train_label_path': 'dataset/COCO/annotations/instances_train2017.json',
         'val_img_path': 'dataset/COCO/val2017',
         'val_label_path': 'dataset/COCO/annotations/instances_val2017.json'
+    })
+
+    voc_dataset = EasyDict({
+        'num_classes': 21,
+        'mean': [0.485, 0.456, 0.406], 
+        'std': [0.229, 0.224, 0.225],
+        'classes': 'dataset/VOC/classes.txt',
+        'image_path': 'dataset/VOC/images',
+        'anno_path': 'dataset/VOC/labels',
+        'train_txt_path':["dataset/VOC/images_id/trainval2007.txt", "dataset/VOC/images_id/trainval2012.txt"],
+        'val_txt_path': ['dataset/VOC/images_id/test2007.txt']
     })
 
     training = EasyDict({

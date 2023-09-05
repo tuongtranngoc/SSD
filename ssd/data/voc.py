@@ -17,14 +17,14 @@ from . import BoxUtils
 from . import cfg
 
 
-class COCODataset(BaseDataset):
-    def __init__(self, label_path, image_path, is_augment=False) -> None:
-        super().__init__(label_path, image_path)
+class VOCDataset(BaseDataset):
+    def __init__(self, label_path, image_path, txt_path, is_augment=False) -> None:
+        super().__init__(label_path, image_path, txt_path)
         self.aug = AlbumAug()
         self.is_augment = is_augment
-        self.coco_dataset = self.load_coco_dataset()
+        self.voc_dataset = self.load_voc_dataset()
         self.__tranform = Transformation()
-    
+
     def get_image_label(self, image_pth, bboxes, labels):
         image = cv2.imread(image_pth)
         image = image[..., ::-1]
@@ -36,7 +36,7 @@ class COCODataset(BaseDataset):
     def matching_defaulboxes(self, bboxes, class_ids):
         bboxes = torch.tensor(bboxes.copy(), dtype=torch.float32)
         class_ids = torch.tensor(class_ids, dtype=torch.long)
-        
+
         bboxes = BoxUtils.normalize_box(bboxes)
         defaultboxes_dict = DefaultBoxesGenerator.build_default_boxes()
         defaultboxes = DefaultBoxesGenerator.merge_defaultboxes(defaultboxes_dict)
@@ -75,11 +75,11 @@ class COCODataset(BaseDataset):
         g_wh = torch.log(gt_bboxes[..., 2:] / df_bboxes[..., 2:])
         gm = torch.cat((g_cxcy, g_wh), dim=1)
         return gm
-
-    def __len__(self): return len(self.coco_dataset)
+    
+    def __len__(self): return len(self.voc_dataset)
 
     def __getitem__(self, index):
-        image_pth, labels = self.coco_dataset[index]
+        image_pth, labels = self.voc_dataset[index]
         class_ids, bboxes = labels[:, 0], labels[:, 1:]
         image, bboxes, class_ids = self.get_image_label(image_pth, bboxes, class_ids)
         targets = self.matching_defaulboxes(bboxes, class_ids)

@@ -11,7 +11,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 
 from . import *
-from .eval import CocoEvaluate
+from .eval import SSDEvaluate
 
 logger = Logger.get_logger("TRAINING")
 
@@ -23,11 +23,11 @@ class Trainer:
         self.best_map = 0.0
         self.create_model()
         self.create_data_loader()
-        self.eval = CocoEvaluate(self.valid_dataset, self.model)
+        self.eval = SSDEvaluate(self.valid_dataset, self.model)
 
     def create_data_loader(self):
-        self.train_dataset = COCODataset(cfg.dataset.train_label_path, cfg.dataset.train_img_path, cfg.training.is_augment)
-        self.valid_dataset = COCODataset(cfg.dataset.val_label_path, cfg.dataset.val_img_path, cfg.valid.is_augment)
+        self.train_dataset = VOCDataset(cfg.voc_dataset.anno_path, cfg.voc_dataset.image_path, cfg.voc_dataset.train_txt_path, cfg.training.is_augment)
+        self.valid_dataset = VOCDataset(cfg.voc_dataset.anno_path, cfg.voc_dataset.image_path, cfg.voc_dataset.val_txt_path, cfg.valid.is_augment)
         self.train_loader = DataLoader(self.train_dataset, 
                                        batch_size=cfg.training.batch_size, 
                                        shuffle=cfg.training.shuffle,

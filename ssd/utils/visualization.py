@@ -13,12 +13,12 @@ from . import *
 import torch.nn.functional as F
 
 
-class COCOAnnotation:
-    """COCO Annotation: color, class ids
+class AnnotationTool:
+    """Annotation: color, class ids
     """
     def __init__(self) -> None:
         self.class_names = defaultdict()
-        with open(cfg.dataset.coco_classes, 'r') as f:
+        with open(cfg.voc_dataset.classes, 'r') as f:
             for i, l in enumerate(f.readlines()):
                 self.class_names[l.strip()] = i
         f.close()
@@ -40,7 +40,7 @@ class Visualizer:
     """
     thickness = 1
     lineType = cv2.LINE_AA
-    coco_ano = COCOAnnotation()
+    coco_ano = AnnotationTool()
     h, w = cfg.models.image_size, cfg.models.image_size
     dfboxes = DefaultBoxesGenerator.build_default_boxes()
     dfboxes = DefaultBoxesGenerator.merge_defaultboxes(dfboxes).to(cfg.device)
@@ -63,6 +63,7 @@ class Visualizer:
 
     @classmethod
     def single_draw_object(cls, image, bbox, conf, label,  type_obj=None):
+        if label == 0: return image
         bbox = cls.unnormalize_box(bbox)
         label = cls.coco_ano.id2class(label)
         if type_obj == 'GT':
@@ -130,10 +131,10 @@ class Visualizer:
             
             if apply_nms:
                 pred_bboxes, confs, cates = BoxUtils.nms(pred_bboxes, confs, cates, cfg.debug.iou_thresh, cfg.debug.conf_thresh)
-
+            
             target_bboxes, target_confs, target_labels = DataUtils.to_numpy(target_bboxes, target_confs, target_labels)
             pred_bboxes, confs, cates = DataUtils.to_numpy(pred_bboxes, confs, cates)
-
+            
             image = DataUtils.image_to_numpy(images[i])
 
             image = cls.draw_objects(image, target_bboxes, target_confs, target_labels, cfg.debug.conf_thresh, type_obj='GT')

@@ -14,7 +14,7 @@ class SSDHead(nn.Module):
         super().__init__()
         self.cls_confs = nn.ModuleList()
         self.reg_boxes = nn.ModuleList()
-
+        
         for num_in, num_out in zip(in_channels, out_channels):
             self.cls_confs.append(
                 nn.Conv2d(num_in, num_classes * num_out, kernel_size=3, padding=1, stride=1)
@@ -31,10 +31,10 @@ class SSDHead(nn.Module):
             reg_out = reg_module(input)
             
             N, _, H, W = cls_out.shape
-
-            cls_out = cls_out.view(N, -1, cfg.dataset.num_classes, H, W)
+            
+            cls_out = cls_out.view(N, -1, cfg.voc_dataset.num_classes, H, W)
             cls_out = cls_out.permute(0, 3, 4, 1, 2)
-            cls_out = cls_out.reshape(N, -1, cfg.dataset.num_classes)
+            cls_out = cls_out.reshape(N, -1, cfg.voc_dataset.num_classes)
 
             reg_out = reg_out.view(N, -1, 4, H, W)
             reg_out = reg_out.permute(0, 3, 4, 1, 2)

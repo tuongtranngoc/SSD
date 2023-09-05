@@ -129,8 +129,8 @@ class DataUtils:
     
     @classmethod
     def denormalize(cls, image):
-        mean = np.array(cfg.dataset.mean, dtype=np.float32)
-        std = np.array(cfg.dataset.std, dtype=np.float32)
+        mean = np.array(cfg.voc_dataset.mean, dtype=np.float32)
+        std = np.array(cfg.voc_dataset.std, dtype=np.float32)
         image *= (std * 255.)
         image += (mean * 255.)
         image = np.clip(image, 0, 255.)

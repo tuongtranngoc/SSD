@@ -3,6 +3,10 @@ import torchvision
 import torch.nn as nn
 import torch.utils.model_zoo as model_zoo
 
+from . import *
+
+logger = Logger.get_logger('MODEL')
+
 model_urls = {
     'vgg16': 'https://download.pytorch.org/models/vgg16-397923af.pth'
 }
@@ -47,6 +51,7 @@ def build_backbone(arch_name='vgg16', pretrained=True):
         RuntimeError("Only support model in [vgg16, vgg16-bn]")
     
     if pretrained:
+        logger.info('Loading pretrained model ...')
         model.load_state_dict(model_zoo.load_url(model_urls[arch_name]), strict=False)
     
     return model, feat_dims

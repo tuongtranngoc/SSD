@@ -10,7 +10,7 @@ from torchmetrics.detection.mean_ap import MeanAveragePrecision
 logger = Logger.get_logger("EVALUATE")
 
 
-class CocoEvaluate:
+class SSDEvaluate:
     def __init__(self, dataset, model) -> None:
         self.model = model
         self.loss_fun = SSDLoss().to(cfg.device)
