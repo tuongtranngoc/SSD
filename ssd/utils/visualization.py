@@ -105,7 +105,7 @@ class Visualizer:
             target_bboxes = BoxUtils.normalize_box(target_bboxes)
             target_confs =  torch.tensor(target_confs, dtype=torch.float32, device=cfg.device)
             target_labels = torch.tensor(target_labels, dtype=torch.long, device=cfg.device)
-            image = torch.tensor(image, dtype=torch.float32, device=cfg.device)
+            image = torch.tensor(image, dtype=torch.float32, device=cfg.device).unsqueeze(0)
             # Decode bboxes
             pred_bboxes, pred_confs = model(image)
             pred_bboxes = BoxUtils.decode_ssd(pred_bboxes, cls.dfboxes)
@@ -128,5 +128,5 @@ class Visualizer:
             # Draw debug images
             image = cls.draw_objects(image, target_bboxes, target_confs, target_labels, cfg.debug.conf_thresh, type_obj='GT')
             image = cls.draw_objects(image, pred_bboxes, confs, cates, cfg.debug.conf_thresh, type_obj='PRED')
-            
+
             cv2.imwrite(os.path.join(debug_dir, type_fit, f'{i}.png'), image)
