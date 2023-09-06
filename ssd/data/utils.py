@@ -18,5 +18,5 @@ class Transformation:
         transformed = self.transformation(image=image, bboxes=bboxes, labels=labels)
         transformed_image = transformed['image'] 
         transformed_bboxes = np.array(transformed['bboxes'], dtype=np.float32)
-        transformed_labels = transformed['labels']
+        transformed_labels = np.array(transformed['labels'])
         return transformed_image, transformed_bboxes, transformed_labels

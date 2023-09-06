@@ -53,7 +53,7 @@ class Trainer:
             mt_reg_loss = BatchMeter()
             mt_cls_loss = BatchMeter()
 
-            for bz, (images, labels) in enumerate(self.train_loader):
+            for bz, (images, labels, _) in enumerate(self.train_loader):
                 self.model.train()
                 images = DataUtils.to_device(images)
                 labels = DataUtils.to_device(labels)

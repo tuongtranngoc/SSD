@@ -43,7 +43,7 @@ class Visualizer:
     cvt_ano = AnnotationTool()
     h, w = cfg.models.image_size, cfg.models.image_size
     dfboxes = DefaultBoxesGenerator.default_boxes.to(cfg.device)
-    
+
     @classmethod
     def unnormalize_box(cls, bboxes:np.ndarray):
         bboxes = bboxes.copy()
@@ -94,58 +94,39 @@ class Visualizer:
     def debug_output(cls, dataset, idxs, model, type_fit, debug_dir, apply_nms=True):
         os.makedirs(os.path.join(debug_dir, type_fit), exist_ok=True)
         model.eval()
-        images = []
-        bboxes = []
-        labels = []
-        for idx in idxs:
-            image, target = dataset[idx]
-            images.append(image)
-            bboxes.append(target[0])
-            labels.append(target[1])
-        
-        images = torch.stack(images, dim=0).to(cfg.device)
-        bboxes = torch.stack(bboxes, dim=0).to(cfg.device)
-        labels = torch.stack(labels, dim=0).to(cfg.device)
+        for i, idx in enumerate(idxs):
+            img_path, targets = dataset.voc_dataset[idx]
+            target_labels, target_bboxes = targets[..., 0], targets[..., 1:]
+            target_confs = np.ones_like(target_labels, dtype=np.float32)
 
-        bpred_bboxes, bpred_confs = model(images) # (N, boxes, 4) & (N, boxes, num classes)
-
-        for i in range(images.size(0)):
-            target_bboxes, target_labels = bboxes[i], labels[i]
-            target_confs = torch.ones_like(target_labels, dtype=torch.float32, device=cfg.device)
-            
-            # Filter negative targets
-            pos_mask = target_labels > 0
-            target_bboxes = target_bboxes[pos_mask]
-            target_labels = target_labels[pos_mask]
-            target_confs = target_confs[pos_mask]
-            dfboxes = cls.dfboxes[pos_mask]
-            
+            # Normalize bboxes
+            image, target_bboxes, target_labels = dataset.get_image_label(img_path, target_bboxes, target_labels, False)
+            target_bboxes =  torch.tensor(target_bboxes, dtype=torch.float32, device=cfg.device)
+            target_bboxes = BoxUtils.normalize_box(target_bboxes)
+            target_confs =  torch.tensor(target_confs, dtype=torch.float32, device=cfg.device)
+            target_labels = torch.tensor(target_labels, dtype=torch.long, device=cfg.device)
+            image = torch.tensor(image, dtype=torch.float32, device=cfg.device)
             # Decode bboxes
-            target_bboxes = BoxUtils.decode_ssd(target_bboxes, dfboxes)
-            target_bboxes = BoxUtils.xcycwh_to_xyxy(target_bboxes)
-
-            pred_bboxes, pred_confs = bpred_bboxes[i], bpred_confs[i]
+            pred_bboxes, pred_confs = model(image)
             pred_bboxes = BoxUtils.decode_ssd(pred_bboxes, cls.dfboxes)
             pred_bboxes = BoxUtils.xcycwh_to_xyxy(pred_bboxes)
             
             pred_confs = torch.softmax(pred_confs, dim=-1)
             confs, cates = pred_confs.max(dim=-1)
-
             # Filter negative predictions
             pred_pos_mask = cates > 0
             pred_bboxes = pred_bboxes[pred_pos_mask]
             confs = confs[pred_pos_mask]
             cates = cates[pred_pos_mask]
-            
             # Apply non-max suppression
             if apply_nms:
                 pred_bboxes, confs, cates = BoxUtils.nms(pred_bboxes, confs, cates, cfg.debug.iou_thresh, cfg.debug.conf_thresh)
             # Tensor to numpy
             target_bboxes, target_confs, target_labels = DataUtils.to_numpy(target_bboxes, target_confs, target_labels)
             pred_bboxes, confs, cates = DataUtils.to_numpy(pred_bboxes, confs, cates)
-            image = DataUtils.image_to_numpy(images[i])
+            image = DataUtils.image_to_numpy(image)
             # Draw debug images
             image = cls.draw_objects(image, target_bboxes, target_confs, target_labels, cfg.debug.conf_thresh, type_obj='GT')
             image = cls.draw_objects(image, pred_bboxes, confs, cates, cfg.debug.conf_thresh, type_obj='PRED')
-
+            
             cv2.imwrite(os.path.join(debug_dir, type_fit, f'{i}.png'), image)

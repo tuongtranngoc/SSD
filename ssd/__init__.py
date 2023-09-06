@@ -3,6 +3,7 @@ from ssd.utils.logger import Logger
 from ssd.utils.losses import SSDLoss
 from ssd.data.coco import COCODataset
 from ssd.utils.metrics import BatchMeter
+from ssd.data.utils import Transformation
 from ssd.models.modules.ssd import SSDModel
 from ssd.utils.tensorboard import Tensorboard
 from ssd.cfg.defaults import Configuration as cfg

@@ -77,6 +77,6 @@ class Configuration:
         "augmentation_debug": "exps/augmentation",
         "log_file": "logs/ssd.log",
         "dfboxes": 'exps/dfboxes',
-        "iou_thresh": 0.5,
+        "iou_thresh": 0.3,
         "conf_thresh": 0.6
     })

@@ -25,10 +25,10 @@ class VOCDataset(BaseDataset):
         self.voc_dataset = self.load_voc_dataset()
         self.__tranform = Transformation()
 
-    def get_image_label(self, image_pth, bboxes, labels):
+    def get_image_label(self, image_pth, bboxes, labels, is_aug):
         image = cv2.imread(image_pth)
         image = image[..., ::-1]
-        if self.is_augment:
+        if is_aug:
             image, bboxes, labels = self.aug(image, bboxes, labels)
         image, bboxes, labels = self.__tranform.transform(image, bboxes, labels)
         return image, bboxes, labels
@@ -77,10 +77,10 @@ class VOCDataset(BaseDataset):
         return gm
     
     def __len__(self): return len(self.voc_dataset)
-
+    
     def __getitem__(self, index):
         image_pth, labels = self.voc_dataset[index]
         class_ids, bboxes = labels[:, 0], labels[:, 1:]
-        image, bboxes, class_ids = self.get_image_label(image_pth, bboxes, class_ids)
-        targets = self.matching_defaulboxes(bboxes, class_ids)
-        return image, targets
+        image, bboxes, class_ids = self.get_image_label(image_pth, bboxes, class_ids, self.is_augment)
+        targets_dfboxes = self.matching_defaulboxes(bboxes, class_ids)
+        return image, targets_dfboxes, index
