@@ -66,12 +66,12 @@ class SSDEvaluate:
                     pred_bboxes, pred_confs = bpred_bboxes[j], bpred_confs[j]
 
                     # Normalize bboxes and to tensor
-                    image, target_bboxes, target_labels = self.dataset.get_image_label(img_path, target_bboxes, target_labels)
+                    image, target_bboxes, target_labels = self.dataset.get_image_label(img_path, target_bboxes, target_labels, False)
                     target_bboxes = torch.tensor(target_bboxes, dtype=torch.float32, device=cfg.device)
                     target_bboxes = BoxUtils.normalize_box(target_bboxes)
                     target_labels = torch.tensor(target_labels, dtype=torch.long, device=cfg.device)
                     target_confs = torch.tensor(target_confs, dtype=torch.float32, device=cfg.device)
-                    
+
                     pred_confs = torch.softmax(pred_confs, dim=-1)
                     pred_confs, pred_cates = pred_confs.max(dim=-1)
 

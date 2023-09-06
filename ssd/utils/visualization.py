@@ -105,9 +105,9 @@ class Visualizer:
             target_bboxes = BoxUtils.normalize_box(target_bboxes)
             target_confs =  torch.tensor(target_confs, dtype=torch.float32, device=cfg.device)
             target_labels = torch.tensor(target_labels, dtype=torch.long, device=cfg.device)
-            image = torch.tensor(image, dtype=torch.float32, device=cfg.device).unsqueeze(0)
             # Decode bboxes
-            pred_bboxes, pred_confs = model(image)
+            pred_bboxes, pred_confs = model(image.to(cfg.device).unsqueeze(0))
+            pred_bboxes, pred_confs = pred_bboxes.squeeze(0), pred_confs.squeeze(0)
             pred_bboxes = BoxUtils.decode_ssd(pred_bboxes, cls.dfboxes)
             pred_bboxes = BoxUtils.xcycwh_to_xyxy(pred_bboxes)
             
