@@ -112,11 +112,13 @@ class DataUtils:
             Exception(f"{data} is not a/tuple/list of tensor type")
 
     @classmethod
-    def to_numpy(cls, *args):
-        args_list = []
-        for i in range(len(args)):
-            args_list.append(cls.single_to_numpy(args[i]))
-        return args_list
+    def to_numpy(cls, data):
+        if isinstance(data, list):
+            for i in range(len(data)):
+                data[i] = cls.single_to_numpy(data[i])
+            return data
+        else:
+            raise Exception(f"{data} is a type of {type(data)}, not list type")
     
     @classmethod
     def single_to_numpy(cls, data):
@@ -148,6 +150,9 @@ class DataUtils:
             image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
             return image
         elif isinstance(image, np.ndarray):
+            image = cls.denormalize(image)
+            image = np.ascontiguousarray(image, np.uint8)
+            image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
             return image
         else:
             raise Exception(f"{image} is a type of {type(image)}, not numpy/tensor type")

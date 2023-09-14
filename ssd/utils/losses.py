@@ -36,10 +36,9 @@ class SSDLoss(nn.Module):
         neg_loss[pos_mask] = -float('inf')
         _, neg_idx = neg_loss.sort(1, descending=True)
         background_idxs = neg_idx.sort(1)[1] < num_neg
-        
         num_pos = max(1, num_pos)
-        
+        # Total losses
         reg_loss = box_loss.sum() / num_pos
         cls_loss = (conf_loss[pos_mask].sum() + conf_loss[background_idxs].sum()) / num_pos
-
+        
         return reg_loss, cls_loss

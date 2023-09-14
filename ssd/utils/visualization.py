@@ -98,7 +98,7 @@ class Visualizer:
             img_path, targets = dataset.voc_dataset[idx]
             target_labels, target_bboxes = targets[..., 0], targets[..., 1:]
             target_confs = np.ones_like(target_labels, dtype=np.float32)
-
+            
             # Normalize bboxes
             image, target_bboxes, target_labels = dataset.get_image_label(img_path, target_bboxes, target_labels, False)
             target_bboxes =  torch.tensor(target_bboxes, dtype=torch.float32, device=cfg.device)
@@ -125,8 +125,54 @@ class Visualizer:
             target_bboxes, target_confs, target_labels = DataUtils.to_numpy(target_bboxes, target_confs, target_labels)
             pred_bboxes, confs, cates = DataUtils.to_numpy(pred_bboxes, confs, cates)
             image = DataUtils.image_to_numpy(image)
-            # Draw debug images
+            # Visualize debug images
             image = cls.draw_objects(image, target_bboxes, target_confs, target_labels, cfg.debug.conf_thresh, type_obj='GT')
             image = cls.draw_objects(image, pred_bboxes, confs, cates, cfg.debug.conf_thresh, type_obj='PRED')
-
+            
             cv2.imwrite(os.path.join(debug_dir, type_fit, f'{i}.png'), image)
+    
+    @classmethod
+    def debug_matched_dfboxes(cls, dataset, idxs):
+        os.makedirs(cfg.debug.matched_dfboxes, exist_ok=True) 
+        for i, idx in enumerate(idxs):
+            img_path, targets = dataset.voc_dataset[idx]
+            target_labels, target_bboxes = targets[..., 0], targets[..., 1:]
+            target_confs = np.ones_like(target_labels, dtype=np.float32)
+            image, matched_dfboxes, _ = dataset[idx]
+            df_bboxes, df_labels = matched_dfboxes
+            # Normalize bboxes
+            _, target_bboxes, target_labels = dataset.get_image_label(img_path, target_bboxes, target_labels, False)
+            # Filter nagative predictions
+            pos_mask = df_labels > 0
+            df_labels = DataUtils.single_to_numpy(df_labels[pos_mask])
+            df_bboxes = BoxUtils.xcycwh_to_xyxy(df_bboxes[pos_mask])
+            df_bboxes = DataUtils.single_to_numpy(df_bboxes)
+            df_confs = np.ones_like(df_labels, np.float32)
+            # Visualize debug
+            image = DataUtils.image_to_numpy(image)
+            image = cls.draw_objects(image, target_bboxes, target_confs, target_labels, cfg.debug.conf_thresh, type_obj='GT')
+            image = cls.draw_objects(image, df_bboxes, df_confs, df_labels, cfg.debug.conf_thresh, type_obj='GT')
+            cv2.imwrite(os.path.join(cfg.debug.matched_dfboxes, f'{idx}.png'), image)
+
+    @classmethod
+    def debug_dfboxes_generator(cls, dataset, idxs):
+        os.makedirs(cfg.debug.dfboxes_generator, exist_ok=True)
+        fm_sizes = cfg.default_boxes.fm_sizes
+        dfboxes_fm = DefaultBoxesGenerator.build_default_boxes()
+        
+        for i in idxs:
+            im_pth, _ = dataset.voc_dataset[i]
+            im = cv2.imread(im_pth)
+            im = cv2.resize(im, (cfg.models.image_size, cfg.models.image_size))
+            id_pth = os.path.join(cfg.debug.dfboxes_generator)
+            os.makedirs(id_pth, exist_ok=True)
+            for fm in fm_sizes:
+                im_fm = im.copy()
+                pos_dfboxes = fm//2
+                dfboxes = dfboxes_fm[fm][pos_dfboxes, pos_dfboxes, ...].reshape(-1, 4)
+                dfboxes = BoxUtils.xcycwh_to_xyxy(dfboxes)
+                dfboxes = BoxUtils.denormalize_box(dfboxes)
+                dfboxes = dfboxes.detach().cpu().numpy()
+                for box in dfboxes:
+                    im_fm = cv2.rectangle(im_fm, (int(box[0]), int(box[1])), (int(box[2]), int(box[3])), color=(255, 0, 0), thickness=1)
+                cv2.imwrite(os.path.join(id_pth, f'{fm}.png'), im_fm)

@@ -54,7 +54,7 @@ class SSDEvaluate:
                 target_dfboxes = DataUtils.to_device(target_dfboxes)
                 out = self.model(tensor_images)
                 reg_loss, cls_loss = self.loss_fun(target_dfboxes, out)
-
+                
                 metrics["eval_reg_loss"].update(reg_loss)
                 metrics["eval_cls_loss"].update(cls_loss)
                 bpred_bboxes, bpred_confs = out
@@ -97,7 +97,7 @@ class SSDEvaluate:
         metrics['eval_map'].update(mAP['map'])
         metrics['eval_map_50'].update(mAP['map_50'])
         metrics['eval_map_75'].update(mAP['map_75'])
-
+        
         logger.info(f'reg_loss: {metrics["eval_reg_loss"].get_value("mean"): .3f}, cls_loss: {metrics["eval_cls_loss"].get_value("mean"): .3f}')
         logger.info(f'mAP: {metrics["eval_map"].get_value("mean"): .3f}, mAP_50: {metrics["eval_map_50"].get_value("mean"): .3f}, mAP_75: {metrics["eval_map_75"].get_value("mean"): .3f}')
 

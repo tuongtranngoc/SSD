@@ -22,7 +22,7 @@ class Tensorboard:
     @classmethod
     def add_histogram(cls):
         pass
-
+    
     @classmethod
     def add_figures(cls):
         pass

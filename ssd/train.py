@@ -28,11 +28,13 @@ class Trainer:
     def create_data_loader(self):
         self.train_dataset = VOCDataset(cfg.voc_dataset.anno_path, cfg.voc_dataset.image_path, cfg.voc_dataset.train_txt_path, cfg.training.is_augment)
         self.valid_dataset = VOCDataset(cfg.voc_dataset.anno_path, cfg.voc_dataset.image_path, cfg.voc_dataset.val_txt_path, cfg.valid.is_augment)
-        self.train_loader = DataLoader(self.train_dataset, 
+        self.train_loader = DataLoader(self.train_dataset,
                                        batch_size=cfg.training.batch_size, 
                                        shuffle=cfg.training.shuffle,
                                        num_workers=cfg.training.num_workers,
                                        pin_memory=cfg.training.pin_memory)
+        Visualizer.debug_dfboxes_generator(self.train_dataset, cfg.debug.idxs_debug)
+        Visualizer.debug_matched_dfboxes(self.train_dataset, cfg.debug.idxs_debug)
         
     def create_model(self):
         self.model = SSDModel(arch_name=cfg.models.arch_name, pretrained=cfg.models.pretrained).to(cfg.device)
@@ -68,7 +70,7 @@ class Trainer:
 
                 mt_reg_loss.update(reg_loss.item())
                 mt_cls_loss.update(cls_loss.item())
-
+                
                 print(f"Epoch {epoch} Batch {bz+1}/{len(self.train_loader)}, reg_loss: {mt_reg_loss.get_value(): .5f}, class_loss: {mt_cls_loss.get_value():.5f}", end="\r")
 
                 Tensorboard.add_scalars("train_loss",

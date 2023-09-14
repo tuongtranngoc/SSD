@@ -49,7 +49,7 @@ class VOCDataset(BaseDataset):
         # Matching default boxes to any ground truth box with jaccard overlap higher than a threshold (0.5)
         ious = BoxUtils.pairwise_ious(bboxes, defaultboxes)
         max_ious, max_idxs = ious.max(dim=0)
-
+        
         # Indicator for matching the i-th default box to the j-th ground truth box of category p
         dfbox_idx_pos = torch.where(max_ious > cfg.default_boxes.iou_thresh)[0]
         iou_pos = max_ious[dfbox_idx_pos]
@@ -66,7 +66,7 @@ class VOCDataset(BaseDataset):
         
         dfbox_pos = self.encode_ssd(bboxes_pos, dfbox_pos)
         dfboxes_mask[dfbox_idx_pos] = dfbox_pos
-
+        
         return dfboxes_mask, dflabels_mask
         
     def encode_ssd(self, gt_bboxes, df_bboxes):
