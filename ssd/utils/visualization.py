@@ -175,5 +175,21 @@ class Visualizer:
                 dfboxes = BoxUtils.denormalize_box(dfboxes)
                 dfboxes = dfboxes.detach().cpu().numpy()
                 for box in dfboxes:
-                    im_fm = cv2.rectangle(im_fm, (int(box[0]), int(box[1])), (int(box[2]), int(box[3])), color=(255, 0, 0), thickness=1)
+                    im_fm = cv2.rectangle(im_fm, (int(box[0]), int(box[1])), (int(box[2]), int(box[3])), color=(255, 0, 0), thickness=cls.thickness)
                 cv2.imwrite(os.path.join(id_pth, f'fm_{fm}.png'), im_fm)
+    
+    @classmethod
+    def debug_augmentation(cls, dataset):
+        os.makedirs(cfg.debug.augmentation_debug, exist_ok=True)
+        range_idxs = list(range(0, 30))
+        aug = AlbumAug()
+        anno_cvt = AnnotationTool()
+        for idx in range_idxs:
+            im_pth, targets = dataset.voc_dataset[idx]
+            im = cv2.imread(im_pth)
+            labels, bboxes = targets[..., 0], targets[..., 1:]
+            im, bboxes, labels = aug(im, bboxes, labels)
+            for box, label in zip(bboxes, labels):
+                im = cv2.rectangle(im, (int(box[0]), int(box[1])), (int(box[2]), int(box[3])), color=(255, 0, 0), thickness=cls.thickness)
+                im = cv2.putText(im, str(anno_cvt.id2class(int(label))), (int(box[0]), int(box[1]+0.025*cls.w)), fontFace=0, fontScale=cls.thickness/2, color=(255, 0, 0), thickness=cls.thickness)
+            cv2.imwrite(os.path.join(cfg.debug.augmentation_debug, f'{os.path.basename(im_pth)}'), im)

@@ -36,6 +36,7 @@ class Trainer:
         if self.args.debug_mode:
             Visualizer.debug_dfboxes_generator(self.valid_dataset, cfg.debug.idxs_debug)
             Visualizer.debug_matched_dfboxes(self.valid_dataset, cfg.debug.idxs_debug)
+            Visualizer.debug_augmentation(self.train_dataset)
         
     def create_model(self):
         self.model = SSDModel(arch_name=cfg.models.arch_name, pretrained=cfg.models.pretrained).to(cfg.device)

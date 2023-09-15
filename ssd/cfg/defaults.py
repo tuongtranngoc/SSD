@@ -81,5 +81,5 @@ class Configuration:
         "conf_thresh": 0.5,
         "matched_dfboxes": "exps/matched_dfboxes",
         "dfboxes_generator": "exps/dfboxes_generator",
-        "debug_mode": True
+        "debug_mode": True,
     })
