@@ -34,8 +34,8 @@ class Trainer:
                                        num_workers=cfg.training.num_workers,
                                        pin_memory=cfg.training.pin_memory)
         if self.args.debug_mode:
-            Visualizer.debug_dfboxes_generator(self.train_dataset, cfg.debug.idxs_debug)
-            Visualizer.debug_matched_dfboxes(self.train_dataset, cfg.debug.idxs_debug)
+            Visualizer.debug_dfboxes_generator(self.valid_dataset, cfg.debug.idxs_debug)
+            Visualizer.debug_matched_dfboxes(self.valid_dataset, cfg.debug.idxs_debug)
         
     def create_model(self):
         self.model = SSDModel(arch_name=cfg.models.arch_name, pretrained=cfg.models.pretrained).to(cfg.device)
@@ -56,7 +56,7 @@ class Trainer:
             mt_reg_loss = BatchMeter()
             mt_cls_loss = BatchMeter()
 
-            for bz, (images, labels, _) in enumerate(self.train_loader):
+            for bz, (images, labels) in enumerate(self.train_loader):
                 self.model.train()
                 images = DataUtils.to_device(images)
                 labels = DataUtils.to_device(labels)
@@ -136,7 +136,7 @@ def cli():
                         help='Model selection contain: vgg16, vgg16-bn, resnet18, resnet34, resnet50')
     parser.add_argument('--resume', nargs='?', const=True, default=False, 
                         help='Resume most recent training')
-    parser.add_argument('--debug_mode', nargs='?', const=True, default=False, 
+    parser.add_argument('--debug_mode', nargs='?', const=True, default=cfg.debug.debug_mode, 
                         help='Turn on debug mode')
     
     args = parser.parse_args()

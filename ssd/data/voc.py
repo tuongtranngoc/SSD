@@ -75,12 +75,12 @@ class VOCDataset(BaseDataset):
         g_wh = torch.log(gt_bboxes[..., 2:] / df_bboxes[..., 2:])
         gm = torch.cat((g_cxcy, g_wh), dim=1)
         return gm
-    
+
     def __len__(self): return len(self.voc_dataset)
     
     def __getitem__(self, index):
         image_pth, labels = self.voc_dataset[index]
         class_ids, bboxes = labels[:, 0], labels[:, 1:]
         image, bboxes, class_ids = self.get_image_label(image_pth, bboxes, class_ids, self.is_augment)
-        targets_dfboxes = self.matching_defaulboxes(bboxes, class_ids)
-        return image, targets_dfboxes, index
+        target_dfboxes = self.matching_defaulboxes(bboxes, class_ids)
+        return image, target_dfboxes

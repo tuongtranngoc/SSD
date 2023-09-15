@@ -54,16 +54,17 @@ class Visualizer:
         return bboxes
 
     @classmethod
-    def draw_objects(cls, image, bboxes, confs, labels, conf_thresh, type_obj=None):
+    def draw_objects(cls, image, bboxes, confs, labels, conf_thresh, type_obj=None, unnormalize=False):
         for bbox, conf, label in zip(bboxes, confs, labels):
             if conf >= conf_thresh:
-                image = cls.single_draw_object(image, bbox, conf, label, type_obj)
+                image = cls.single_draw_object(image, bbox, conf, label, type_obj, unnormalize)
         return image
 
     @classmethod
-    def single_draw_object(cls, image, bbox, conf, label,  type_obj=None):
+    def single_draw_object(cls, image, bbox, conf, label,  type_obj=None, unnormalize=False):
         if label == 0: return image
-        bbox = cls.unnormalize_box(bbox)
+        if unnormalize:
+            bbox = cls.unnormalize_box(bbox)
         label = cls.cvt_ano.id2class(label)
         if type_obj == 'GT':
             color = cls.cvt_ano.class2color('groundtruth')
@@ -98,7 +99,6 @@ class Visualizer:
             img_path, targets = dataset.voc_dataset[idx]
             target_labels, target_bboxes = targets[..., 0], targets[..., 1:]
             target_confs = np.ones_like(target_labels, dtype=np.float32)
-            
             # Normalize bboxes
             image, target_bboxes, target_labels = dataset.get_image_label(img_path, target_bboxes, target_labels, False)
             target_bboxes =  torch.tensor(target_bboxes, dtype=torch.float32, device=cfg.device)
@@ -126,8 +126,8 @@ class Visualizer:
             pred_bboxes, confs, cates = DataUtils.to_numpy(pred_bboxes, confs, cates)
             image = DataUtils.image_to_numpy(image)
             # Visualize debug images
-            image = cls.draw_objects(image, target_bboxes, target_confs, target_labels, cfg.debug.conf_thresh, type_obj='GT')
-            image = cls.draw_objects(image, pred_bboxes, confs, cates, cfg.debug.conf_thresh, type_obj='PRED')
+            image = cls.draw_objects(image, target_bboxes, target_confs, target_labels, cfg.debug.conf_thresh, type_obj='GT', unnormalize=True)
+            image = cls.draw_objects(image, pred_bboxes, confs, cates, cfg.debug.conf_thresh, type_obj='PRED', unnormalize=True)
             
             cv2.imwrite(os.path.join(debug_dir, type_fit, f'{i}.png'), image)
     
@@ -138,10 +138,10 @@ class Visualizer:
             img_path, targets = dataset.voc_dataset[idx]
             target_labels, target_bboxes = targets[..., 0], targets[..., 1:]
             target_confs = np.ones_like(target_labels, dtype=np.float32)
-            image, matched_dfboxes, _ = dataset[idx]
+            __ , matched_dfboxes = dataset[idx]
             df_bboxes, df_labels = matched_dfboxes
             # Normalize bboxes
-            _, target_bboxes, target_labels = dataset.get_image_label(img_path, target_bboxes, target_labels, False)
+            image, target_bboxes, target_labels = dataset.get_image_label(img_path, target_bboxes, target_labels, False)
             # Filter nagative predictions
             pos_mask = df_labels > 0
             df_labels = DataUtils.single_to_numpy(df_labels[pos_mask])
@@ -151,10 +151,10 @@ class Visualizer:
             df_confs = np.ones_like(df_labels, np.float32)
             # Visualize debug
             image = DataUtils.image_to_numpy(image)
-            image = cls.draw_objects(image, target_bboxes, target_confs, target_labels, cfg.debug.conf_thresh, type_obj='GT')
-            image = cls.draw_objects(image, df_bboxes, df_confs, df_labels, cfg.debug.conf_thresh, type_obj='PRED')
+            image = cls.draw_objects(image, df_bboxes, df_confs, df_labels, cfg.debug.conf_thresh, type_obj='PRED', unnormalize=True)
+            image = cls.draw_objects(image, target_bboxes, target_confs, target_labels, cfg.debug.conf_thresh, type_obj='GT', unnormalize=False)
             cv2.imwrite(os.path.join(cfg.debug.matched_dfboxes, f'{idx}.png'), image)
-            
+    
     @classmethod
     def debug_dfboxes_generator(cls, dataset, idxs):
         os.makedirs(cfg.debug.dfboxes_generator, exist_ok=True)
