@@ -33,8 +33,9 @@ class Trainer:
                                        shuffle=cfg.training.shuffle,
                                        num_workers=cfg.training.num_workers,
                                        pin_memory=cfg.training.pin_memory)
-        Visualizer.debug_dfboxes_generator(self.train_dataset, cfg.debug.idxs_debug)
-        Visualizer.debug_matched_dfboxes(self.train_dataset, cfg.debug.idxs_debug)
+        if self.args.debug_mode:
+            Visualizer.debug_dfboxes_generator(self.train_dataset, cfg.debug.idxs_debug)
+            Visualizer.debug_matched_dfboxes(self.train_dataset, cfg.debug.idxs_debug)
         
     def create_model(self):
         self.model = SSDModel(arch_name=cfg.models.arch_name, pretrained=cfg.models.pretrained).to(cfg.device)
@@ -105,8 +106,9 @@ class Trainer:
             self.save_ckpt(last_ckpt, self.best_map50, epoch)
 
             # Debug after each training epoch
-            Visualizer.debug_output(self.train_dataset, cfg.debug.idxs_debug, self.model, 'train', cfg.debug.training_debug, apply_nms=True)
-            Visualizer.debug_output(self.valid_dataset, cfg.debug.idxs_debug, self.model, 'valid', cfg.debug.valid_debug, apply_nms=True)
+            if self.args.debug_mode:
+                Visualizer.debug_output(self.train_dataset, cfg.debug.idxs_debug, self.model, 'train', cfg.debug.training_debug, apply_nms=True)
+                Visualizer.debug_output(self.valid_dataset, cfg.debug.idxs_debug, self.model, 'valid', cfg.debug.valid_debug, apply_nms=True)
 
     def save_ckpt(self, save_path, best_acc, epoch):
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
@@ -134,6 +136,8 @@ def cli():
                         help='Model selection contain: vgg16, vgg16-bn, resnet18, resnet34, resnet50')
     parser.add_argument('--resume', nargs='?', const=True, default=False, 
                         help='Resume most recent training')
+    parser.add_argument('--debug_mode', nargs='?', const=True, default=False, 
+                        help='Turn on debug mode')
     
     args = parser.parse_args()
     return args
