@@ -145,15 +145,16 @@ class Visualizer:
             # Filter nagative predictions
             pos_mask = df_labels > 0
             df_labels = DataUtils.single_to_numpy(df_labels[pos_mask])
-            df_bboxes = BoxUtils.xcycwh_to_xyxy(df_bboxes[pos_mask])
+            df_bboxes = BoxUtils.decode_ssd(df_bboxes[pos_mask], cls.dfboxes[pos_mask])
+            df_bboxes = BoxUtils.xcycwh_to_xyxy(df_bboxes)
             df_bboxes = DataUtils.single_to_numpy(df_bboxes)
             df_confs = np.ones_like(df_labels, np.float32)
             # Visualize debug
             image = DataUtils.image_to_numpy(image)
             image = cls.draw_objects(image, target_bboxes, target_confs, target_labels, cfg.debug.conf_thresh, type_obj='GT')
-            image = cls.draw_objects(image, df_bboxes, df_confs, df_labels, cfg.debug.conf_thresh, type_obj='GT')
+            image = cls.draw_objects(image, df_bboxes, df_confs, df_labels, cfg.debug.conf_thresh, type_obj='PRED')
             cv2.imwrite(os.path.join(cfg.debug.matched_dfboxes, f'{idx}.png'), image)
-
+            
     @classmethod
     def debug_dfboxes_generator(cls, dataset, idxs):
         os.makedirs(cfg.debug.dfboxes_generator, exist_ok=True)
@@ -175,4 +176,4 @@ class Visualizer:
                 dfboxes = dfboxes.detach().cpu().numpy()
                 for box in dfboxes:
                     im_fm = cv2.rectangle(im_fm, (int(box[0]), int(box[1])), (int(box[2]), int(box[3])), color=(255, 0, 0), thickness=1)
-                cv2.imwrite(os.path.join(id_pth, f'{fm}.png'), im_fm)
+                cv2.imwrite(os.path.join(id_pth, f'fm_{fm}.png'), im_fm)
