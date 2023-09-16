@@ -83,4 +83,4 @@ class VOCDataset(BaseDataset):
         class_ids, bboxes = labels[:, 0], labels[:, 1:]
         image, bboxes, class_ids = self.get_image_label(image_pth, bboxes, class_ids, self.is_augment)
         target_dfboxes = self.matching_defaulboxes(bboxes, class_ids)
-        return image, target_dfboxes
+        return image, target_dfboxes, index

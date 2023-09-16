@@ -34,9 +34,9 @@ class Trainer:
                                        num_workers=cfg.training.num_workers,
                                        pin_memory=cfg.training.pin_memory)
         if self.args.debug_mode:
-            Visualizer.debug_dfboxes_generator(self.valid_dataset, cfg.debug.idxs_debug)
-            Visualizer.debug_matched_dfboxes(self.valid_dataset, cfg.debug.idxs_debug)
             Visualizer.debug_augmentation(self.train_dataset)
+            Visualizer.debug_matched_dfboxes(self.valid_dataset, cfg.debug.idxs_debug)
+            Visualizer.debug_dfboxes_generator(self.valid_dataset, cfg.debug.idxs_debug)
         
     def create_model(self):
         self.model = SSDModel(arch_name=cfg.models.arch_name, pretrained=cfg.models.pretrained).to(cfg.device)
@@ -57,7 +57,7 @@ class Trainer:
             mt_reg_loss = BatchMeter()
             mt_cls_loss = BatchMeter()
 
-            for bz, (images, labels) in enumerate(self.train_loader):
+            for bz, (images, labels, __) in enumerate(self.train_loader):
                 self.model.train()
                 images = DataUtils.to_device(images)
                 labels = DataUtils.to_device(labels)
@@ -108,8 +108,8 @@ class Trainer:
 
             # Debug after each training epoch
             if self.args.debug_mode:
-                Visualizer.debug_output(self.train_dataset, cfg.debug.idxs_debug, self.model, 'train', cfg.debug.training_debug, apply_nms=True)
                 Visualizer.debug_output(self.valid_dataset, cfg.debug.idxs_debug, self.model, 'valid', cfg.debug.valid_debug, apply_nms=True)
+                Visualizer.debug_output(self.train_dataset, cfg.debug.idxs_debug, self.model, 'train', cfg.debug.training_debug, apply_nms=True)
 
     def save_ckpt(self, save_path, best_acc, epoch):
         os.makedirs(os.path.dirname(save_path), exist_ok=True)

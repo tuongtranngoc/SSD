@@ -122,8 +122,8 @@ class Visualizer:
             if apply_nms:
                 pred_bboxes, confs, cates = BoxUtils.nms(pred_bboxes, confs, cates, cfg.debug.iou_thresh, cfg.debug.conf_thresh)
             # Tensor to numpy
-            target_bboxes, target_confs, target_labels = DataUtils.to_numpy(target_bboxes, target_confs, target_labels)
-            pred_bboxes, confs, cates = DataUtils.to_numpy(pred_bboxes, confs, cates)
+            target_bboxes, target_confs, target_labels = DataUtils.to_numpy([target_bboxes, target_confs, target_labels])
+            pred_bboxes, confs, cates = DataUtils.to_numpy([pred_bboxes, confs, cates])
             image = DataUtils.image_to_numpy(image)
             # Visualize debug images
             image = cls.draw_objects(image, target_bboxes, target_confs, target_labels, cfg.debug.conf_thresh, type_obj='GT', unnormalize=True)
@@ -138,7 +138,7 @@ class Visualizer:
             img_path, targets = dataset.voc_dataset[idx]
             target_labels, target_bboxes = targets[..., 0], targets[..., 1:]
             target_confs = np.ones_like(target_labels, dtype=np.float32)
-            __ , matched_dfboxes = dataset[idx]
+            __ , matched_dfboxes, __ = dataset[idx]
             df_bboxes, df_labels = matched_dfboxes
             # Normalize bboxes
             image, target_bboxes, target_labels = dataset.get_image_label(img_path, target_bboxes, target_labels, False)

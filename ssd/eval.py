@@ -91,7 +91,7 @@ class SSDEvaluate:
 
                     # Calculate mAP
                     self.cal_mAP(map_mt, pred_bboxes, pred_confs ,pred_cates, target_bboxes, target_confs, target_labels)
-
+        
         # Compute mAP
         mAP = map_mt.compute()
         metrics['eval_map'].update(mAP['map'])
