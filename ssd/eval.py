@@ -100,7 +100,7 @@ class SSDEvaluate:
         
         logger.info(f'reg_loss: {metrics["eval_reg_loss"].get_value("mean"): .3f}, cls_loss: {metrics["eval_cls_loss"].get_value("mean"): .3f}')
         logger.info(f'mAP: {metrics["eval_map"].get_value("mean"): .3f}, mAP_50: {metrics["eval_map_50"].get_value("mean"): .3f}, mAP_75: {metrics["eval_map_75"].get_value("mean"): .3f}')
-
+        
         return metrics
     
 def cli():
@@ -110,7 +110,7 @@ def cli():
     parser.add_argument('--batch_size', type=int, default=cfg.valid.batch_size, help='Batch size of evaluation')
     parser.add_argument('--conf_thresh', type=float, default=cfg.debug.conf_thresh, help='Confidence threshold for evaluation')
     parser.add_argument('--iou_thresh', type=float, default=cfg.debug.iou_thresh, help='Iou threshold for evaluation')
-
+    
     args = parser.parse_args()
     return args
 

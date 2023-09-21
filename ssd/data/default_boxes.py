@@ -13,8 +13,9 @@ class DefaultBoxesGenerator:
     m = cfg.default_boxes.fm_sizes
     s_min = cfg.default_boxes.s_min
     s_max = cfg.default_boxes.s_max
-    ratios = cfg.default_boxes.respect_ratio
+    ratios = cfg.default_boxes.aspect_ratio
     im_size = cfg.models.image_size
+    variances = cfg.default_boxes.variances
         
     @classmethod
     def build_default_boxes(cls):
@@ -50,7 +51,7 @@ class DefaultBoxesGenerator:
             wh_ratios = torch.tensor(wh_ratios, dtype=torch.float32)
             wh_ratios = torch.clamp(wh_ratios, min=0.0, max=1.0)
             df_bboxes[fm_size][..., 2:] = wh_ratios
-
+        
         return df_bboxes
     
     @classmethod

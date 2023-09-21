@@ -19,10 +19,10 @@ class AlbumAug:
             A.RandomBrightnessContrast(p=0.3),
             A.MedianBlur(p=0.01, blur_limit=5),
             A.ShiftScaleRotate(p=0.2, rotate_limit=15),
+            A.PixelDropout(dropout_prob=0.10, per_channel=1, drop_value=(40, 40, 40)),
             A.HueSaturationValue(hue_shift_limit=20, sat_shift_limit=20, val_shift_limit=20),
             ],
-        bbox_params=A.BboxParams(format='pascal_voc', label_fields=['labels'], min_visibility=0.2),
-        )
+        bbox_params=A.BboxParams(format='pascal_voc', label_fields=['labels'], min_visibility=0.2))
     
     def __call__(self, image, bboxes, labels):
         transformed = self.transform(image=image, bboxes=bboxes, labels=labels)

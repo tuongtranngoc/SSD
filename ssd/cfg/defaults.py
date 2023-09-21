@@ -12,8 +12,8 @@ class Configuration:
     })
     
     default_boxes = EasyDict({
-        'respect_ratio': [1, 2, 3, 1/2, 1/3],
-        's_min': 0.2,
+        'aspect_ratio': [1, 2, 3, 1/2, 1/3],
+        's_min': 0.1,
         's_max': 0.9,
         'fm_sizes': [38, 19, 10, 5, 3, 1],
         'dfboxes_sizes': [6, 6, 6, 6, 6, 6],
@@ -21,17 +21,7 @@ class Configuration:
         'ratio_pos_neg': 3,
         'alpha': 1,
         'label_smooth': 0.1,
-    })
-
-    coco_dataset = EasyDict({
-        'num_classes': 81,
-        'mean': [0.485, 0.456, 0.406], 
-        'std': [0.229, 0.224, 0.225],
-        'classes': 'dataset/COCO/coco80.txt',
-        'train_img_path': 'dataset/COCO/train2017',
-        'train_label_path': 'dataset/COCO/annotations/instances_train2017.json',
-        'val_img_path': 'dataset/COCO/val2017',
-        'val_label_path': 'dataset/COCO/annotations/instances_val2017.json'
+        'variances': [0.1, 0.2]
     })
 
     voc_dataset = EasyDict({
@@ -77,8 +67,8 @@ class Configuration:
         "augmentation_debug": "exps/augmentation",
         "log_file": "logs/ssd.log",
         "dfboxes": 'exps/dfboxes',
-        "iou_thresh": 0.5,
-        "conf_thresh": 0.5,
+        "iou_thresh": 0.3,
+        "conf_thresh": 0.6,
         "matched_dfboxes": "exps/matched_dfboxes",
         "dfboxes_generator": "exps/dfboxes_generator",
         "debug_mode": True,

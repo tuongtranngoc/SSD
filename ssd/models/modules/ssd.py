@@ -6,7 +6,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from .backbone import build_backbone
+from .backbone import vgg16_extractor
 from .neck import SSDNeck
 from .head import SSDHead
 
@@ -16,12 +16,11 @@ from . import cfg
 class SSDModel(nn.Module):
     def __init__(self, arch_name='vgg16', pretrained=True) -> None:
         super().__init__()
-        self.extract_features, feat_dims = build_backbone(arch_name, pretrained)
-        self.neck = SSDNeck(feat_dims)
+        backbone = vgg16_extractor(arch_name, pretrained)
+        self.neck = SSDNeck(backbone)
         self.head = SSDHead(cfg.voc_dataset.num_classes, cfg.models.fm_channels, cfg.default_boxes.dfboxes_sizes)
-        
+    
     def forward(self, x):
-        x = self.extract_features(x)
         x = self.neck(x)
         x = self.head(x)
         return x

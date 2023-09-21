@@ -55,11 +55,11 @@ class BoxUtils:
         dfboxes = dfboxes.to(pred_bboxes.device)
         pred_bboxes = pred_bboxes.clone()
         # transform offset into cxcywh
-        xcyc = pred_bboxes[..., :2] * dfboxes[..., 2:] + dfboxes[..., :2]
-        wh = torch.exp(pred_bboxes[..., 2:]) * dfboxes[..., 2:]
+        xcyc = pred_bboxes[..., :2] * (dfboxes[..., 2:] * cfg.default_boxes.variances[1]) + dfboxes[..., :2]
+        wh = torch.exp(pred_bboxes[..., 2:] * cfg.default_boxes.variances[0]) * dfboxes[..., 2:]
         xcycwh = torch.cat((xcyc, wh), dim=1)
         return xcycwh
-
+    
     @classmethod
     def normalize_box(cls, bboxes:torch.Tensor):
         bboxes = bboxes.clone()

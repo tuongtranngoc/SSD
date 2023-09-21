@@ -24,7 +24,7 @@ class Trainer:
         self.create_model()
         self.create_data_loader()
         self.eval = SSDEvaluate(self.valid_dataset, self.model)
-
+    
     def create_data_loader(self):
         self.train_dataset = VOCDataset(cfg.voc_dataset.anno_path, cfg.voc_dataset.image_path, cfg.voc_dataset.train_txt_path, cfg.training.is_augment)
         self.valid_dataset = VOCDataset(cfg.voc_dataset.anno_path, cfg.voc_dataset.image_path, cfg.voc_dataset.val_txt_path, cfg.valid.is_augment)
@@ -51,7 +51,6 @@ class Trainer:
                 self.start_epoch = self.resume_training(ckpt)
                 logger.info(f"Loading checkpoint with start epoch: {self.start_epoch}, best mAP_50: {self.best_map50}")
 
-    
     def train(self):
         for epoch in range(self.start_epoch, cfg.training.epochs):
             mt_reg_loss = BatchMeter()
@@ -99,18 +98,18 @@ class Trainer:
                 current_map50 = metrics["eval_map_50"].get_value("mean")
                 if current_map50 > self.best_map50:
                     self.best_map50 = current_map50
-                    best_cpkt_pth = os.path.join(cfg.debug.ckpt_dirpath, self.args.model_type, 'best.pt')
+                    best_cpkt_pth = os.path.join(cfg.debug.ckpt_dirpath, cfg.models.arch_name, 'best.pt')
                     self.save_ckpt(best_cpkt_pth, self.best_map50, epoch)
 
             # Save last checkpoint
-            last_ckpt = os.path.join(cfg.debug.ckpt_dirpath, self.args.model_type, 'last.pt')
+            last_ckpt = os.path.join(cfg.debug.ckpt_dirpath, cfg.models.arch_name, 'last.pt')
             self.save_ckpt(last_ckpt, self.best_map50, epoch)
 
             # Debug after each training epoch
             if self.args.debug_mode:
                 Visualizer.debug_output(self.valid_dataset, cfg.debug.idxs_debug, self.model, 'valid', cfg.debug.valid_debug, apply_nms=True)
                 Visualizer.debug_output(self.train_dataset, cfg.debug.idxs_debug, self.model, 'train', cfg.debug.training_debug, apply_nms=True)
-
+    
     def save_ckpt(self, save_path, best_acc, epoch):
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
         ckpt_dict = {
@@ -133,8 +132,6 @@ class Trainer:
 
 def cli():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--model_type', type=str, default='vgg16',
-                        help='Model selection contain: vgg16, vgg16-bn, resnet18, resnet34, resnet50')
     parser.add_argument('--resume', nargs='?', const=True, default=False, 
                         help='Resume most recent training')
     parser.add_argument('--debug_mode', nargs='?', const=True, default=cfg.debug.debug_mode, 

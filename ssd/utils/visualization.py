@@ -28,6 +28,7 @@ class AnnotationTool:
     def class2color(self, cls_name):
         self.colors['groundtruth'] = (0, 0, 255)
         self.colors['background'] = (128, 128, 128)
+        self.colors['dfboxes'] = (255, 0, 0)
         return self.colors[cls_name]
 
     def id2class(self, cls_id):
@@ -72,6 +73,9 @@ class Visualizer:
         elif type_obj == 'PRED':
             color = cls.cvt_ano.class2color(label)
             text = '-'.join([label, str(round(conf, 3))])
+        elif type_obj == 'dfboxes':
+            color = cls.cvt_ano.class2color('dfboxes')
+            text = ''
         else:
             Exception(f"Not have type_obj is None")
 
@@ -128,7 +132,7 @@ class Visualizer:
             # Visualize debug images
             image = cls.draw_objects(image, target_bboxes, target_confs, target_labels, cfg.debug.conf_thresh, type_obj='GT', unnormalize=True)
             image = cls.draw_objects(image, pred_bboxes, confs, cates, cfg.debug.conf_thresh, type_obj='PRED', unnormalize=True)
-            
+             
             cv2.imwrite(os.path.join(debug_dir, type_fit, f'{i}.png'), image)
     
     @classmethod
@@ -151,7 +155,7 @@ class Visualizer:
             df_confs = np.ones_like(df_labels, np.float32)
             # Visualize debug
             image = DataUtils.image_to_numpy(image)
-            image = cls.draw_objects(image, df_bboxes, df_confs, df_labels, cfg.debug.conf_thresh, type_obj='PRED', unnormalize=True)
+            image = cls.draw_objects(image, df_bboxes, df_confs, df_labels, cfg.debug.conf_thresh, type_obj='dfboxes', unnormalize=True)
             image = cls.draw_objects(image, target_bboxes, target_confs, target_labels, cfg.debug.conf_thresh, type_obj='GT', unnormalize=False)
             cv2.imwrite(os.path.join(cfg.debug.matched_dfboxes, f'{idx}.png'), image)
     
@@ -175,7 +179,7 @@ class Visualizer:
                 dfboxes = BoxUtils.denormalize_box(dfboxes)
                 dfboxes = dfboxes.detach().cpu().numpy()
                 for box in dfboxes:
-                    im_fm = cv2.rectangle(im_fm, (int(box[0]), int(box[1])), (int(box[2]), int(box[3])), color=(255, 0, 0), thickness=cls.thickness)
+                    im_fm = cv2.rectangle(im_fm, (int(box[0]), int(box[1])), (int(box[2]), int(box[3])), color=(0, 0, 255), thickness=cls.thickness)
                 cv2.imwrite(os.path.join(id_pth, f'fm_{fm}.png'), im_fm)
     
     @classmethod

@@ -68,11 +68,11 @@ class VOCDataset(BaseDataset):
         dfboxes_mask[dfbox_idx_pos] = dfbox_pos
         
         return dfboxes_mask, dflabels_mask
-        
+    
     def encode_ssd(self, gt_bboxes, df_bboxes):
         # Simplify the location of default boxes
-        g_cxcy = (gt_bboxes[..., :2] - df_bboxes[..., :2]) / df_bboxes[..., 2:]
-        g_wh = torch.log(gt_bboxes[..., 2:] / df_bboxes[..., 2:])
+        g_cxcy = (gt_bboxes[..., :2] - df_bboxes[..., :2]) / (df_bboxes[..., 2:] * cfg.default_boxes.variances[1])
+        g_wh = torch.log(gt_bboxes[..., 2:] / df_bboxes[..., 2:]) / cfg.default_boxes.variances[0]
         gm = torch.cat((g_cxcy, g_wh), dim=1)
         return gm
 
