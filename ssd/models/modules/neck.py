@@ -9,6 +9,14 @@ import torch.nn.functional as F
 from . import cfg
 
 
+def _xavier_init(conv: nn.Module):
+    for layer in conv.modules():
+        if isinstance(layer, nn.Conv2d):
+            torch.nn.init.xavier_uniform_(layer.weight)
+            if layer.bias is not None:
+                torch.nn.init.constant_(layer.bias, 0.0)
+
+
 class SSDNeck(nn.Module):
     def __init__(self, backbone) -> None:
         super().__init__()
@@ -16,10 +24,10 @@ class SSDNeck(nn.Module):
         # Patch ceil_mode for maxpool3 to get the same WxH output sizes as the paper
         backbone[maxpool3_pos].ceil_mode = True
         self.features = nn.Sequential(*backbone[:maxpool4_pos])
-
+        
         # Parameters used for L2 normalization + rescale
         self.scale_weight = nn.Parameter(torch.ones(cfg.models.fm_channels[0]) * 20)
-
+        
         # FC
         fc = nn.Sequential(
             nn.MaxPool2d(kernel_size=3, stride=1, padding=1, ceil_mode=False),  # add modified maxpool5
@@ -59,10 +67,10 @@ class SSDNeck(nn.Module):
                 nn.Conv2d(128, 256, kernel_size=3, padding=0, stride=1)
             )
         ])
-
+        
         extra_feature_layers.insert(0, nn.Sequential(*backbone[maxpool4_pos:-1], fc)) # until conv5_3, skip maxpool5
         self.extra_feature_layers = extra_feature_layers
-
+    
     def forward(self, x):
         x = self.features(x)
         # L2 Normalization + rescale for conv4_3

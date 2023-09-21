@@ -85,7 +85,7 @@ class SSDEvaluate:
                     # Decode predicted bboxes
                     pred_bboxes = BoxUtils.decode_ssd(pred_bboxes, pred_dfboxes)
                     pred_bboxes = BoxUtils.xcycwh_to_xyxy(pred_bboxes)
-
+                    
                     # Apply non-max suppression
                     pred_bboxes, pred_confs, pred_cates = BoxUtils.nms(pred_bboxes, pred_confs, pred_cates, cfg.debug.iou_thresh, cfg.debug.conf_thresh)
 

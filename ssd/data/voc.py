@@ -75,7 +75,7 @@ class VOCDataset(BaseDataset):
         g_wh = torch.log(gt_bboxes[..., 2:] / df_bboxes[..., 2:]) / cfg.default_boxes.variances[0]
         gm = torch.cat((g_cxcy, g_wh), dim=1)
         return gm
-
+    
     def __len__(self): return len(self.voc_dataset)
     
     def __getitem__(self, index):

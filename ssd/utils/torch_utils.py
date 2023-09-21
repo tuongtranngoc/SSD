@@ -89,7 +89,7 @@ class BoxUtils:
         nms_bboxes = pred_bboxes[idxs]
         nms_confs = pred_confs[idxs]
         nms_classes = pred_classes[idxs]
-        
+    
         return nms_bboxes, nms_confs, nms_classes
 
 

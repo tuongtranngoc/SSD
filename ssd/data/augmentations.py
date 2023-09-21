@@ -15,12 +15,12 @@ class AlbumAug:
             A.HorizontalFlip(p=0.5),
             A.Affine(p=0.3, rotate=15),
             A.BBoxSafeRandomCrop(p=0.3),
-            A.Blur(p=0.01, blur_limit=5),
+            A.Blur(p=0.3, blur_limit=5),
             A.RandomBrightnessContrast(p=0.3),
-            A.MedianBlur(p=0.01, blur_limit=5),
-            A.ShiftScaleRotate(p=0.2, rotate_limit=15),
-            A.PixelDropout(dropout_prob=0.10, per_channel=1, drop_value=(40, 40, 40)),
-            A.HueSaturationValue(hue_shift_limit=20, sat_shift_limit=20, val_shift_limit=20),
+            A.MedianBlur(p=0.3, blur_limit=5),
+            A.ShiftScaleRotate(p=0.5, rotate_limit=15),
+            A.PixelDropout(dropout_prob=0.10, per_channel=1, drop_value=(40, 40, 40), p=0.3),
+            A.HueSaturationValue(hue_shift_limit=20, sat_shift_limit=20, val_shift_limit=20, p=0.3),
             ],
         bbox_params=A.BboxParams(format='pascal_voc', label_fields=['labels'], min_visibility=0.2))
     

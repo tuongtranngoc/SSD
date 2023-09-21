@@ -6,9 +6,6 @@ try:
 except ImportError:
     from torch.utils.model_zoo import load_url as load_state_dict_from_url
 
-
-__all__ = ['VGG', 'vgg16', 'vgg16_bn']
-
 model_urls = {
     'vgg16': 'https://download.pytorch.org/models/vgg16-397923af.pth',
     'vgg16_bn': 'https://download.pytorch.org/models/vgg16_bn-6c64b313.pth',
