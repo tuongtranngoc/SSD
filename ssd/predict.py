@@ -15,7 +15,7 @@ from . import *
 
 class Predictor:
     def __init__(self) -> None:
-        self.model = SSDModel().to(cfg.device)
+        self.model = SSDModel(cfg.models.arch_name).to(cfg.device)
         self.model = self.load_ckpt(self.model, os.path.join(cfg.debug.ckpt_dirpath, cfg.models.arch_name, 'best.pt'))
         self.transform = A.Compose([
             A.Resize(cfg.models.image_size, cfg.models.image_size),
