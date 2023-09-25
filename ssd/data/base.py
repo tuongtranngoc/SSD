@@ -105,6 +105,7 @@ class BaseDataset(Dataset):
                     image_pth = os.path.join(image_dir, anno.filename)
                     if type(anno.object) is not list:
                         anno.object = [anno.object]
+                    
                     bboxes = []
                     for item in anno.object:
                         if item.difficult == '1' or item.name not in class2ids: continue

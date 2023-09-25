@@ -3,3 +3,4 @@ dataset/COCO/train2017
 dataset/COCO/val2017
 dataset/VOC/*
 **/__pycache__/
+ssd/weights/*

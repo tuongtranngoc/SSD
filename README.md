@@ -17,9 +17,7 @@
 | Backbone | Dataset | Training dataset | Valid dataset | Image size | mAP | mAP_50 | mAP_75 |
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 |Original paper|PASCAL VOC|trainval 2007+2012|test2007|300x300|--|--|--|
-|VGG16|PASCAL VOC|trainval 2007+2012|test2007|300x300|--|--|--|
-|ResNet34|PASCAL VOC|trainval 2007+2012|test2007|300x300|--|--|--|
-|ResNet50|PASCAL VOC|trainval 2007+2012|test2007|300x300|--|--|--|
+|VGG16-BN|PASCAL VOC|trainval 2007+2012|test2007|300x300|--|--|--|
 
 ## Dataset
 + Download Pascal VOC train+val 2012+2007
@@ -49,14 +47,14 @@ Put all images, annotations, txt files in folder `dataset/VOC` folder as followi
 
 ### Training
 ```shell
-python -m src.train --model_type vgg16/vgg16-bn/resnet34/resnet50 --resume resume_most_recent_training
+python -m src.train --model_type vgg16/vgg16-bn --resume resume_most_recent_training
 ```
 ### Evaluate
 ```shell
-python -m src.eval --model_type vgg16/vgg16-bn/resnet34/resnet50 --weight_type path_to_weight_best.pt
+python -m src.eval --model_type vgg16/vgg16-bn --weight_type path_to_weight_best.pt
 ```
 
 ### Prediction
 ```shell
-python -m src.predict --model_type rvgg16/vgg16-bn/resnet34/resnet50 --weight_path path_to_weight_best.pt --input_folder path_input_folder --output_folder path_to_output_folder --conf_thresh confidence_threshold --iou_thresh iou threshold 
+python -m src.predict --model_type rvgg16/vgg16-bn--weight_path path_to_weight_best.pt --input_folder path_input_folder --output_folder path_to_output_folder --conf_thresh confidence_threshold --iou_thresh iou threshold 
 ```

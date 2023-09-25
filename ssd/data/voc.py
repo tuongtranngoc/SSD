@@ -25,10 +25,10 @@ class VOCDataset(BaseDataset):
         self.voc_dataset = self.load_voc_dataset()
         self.__tranform = Transformation()
 
-    def get_image_label(self, image_pth, bboxes, labels):
+    def get_image_label(self, image_pth, bboxes, labels, is_aug):
         image = cv2.imread(image_pth)
         image = image[..., ::-1]
-        if self.is_augment:
+        if is_aug:
             image, bboxes, labels = self.aug(image, bboxes, labels)
         image, bboxes, labels = self.__tranform.transform(image, bboxes, labels)
         return image, bboxes, labels
@@ -49,7 +49,7 @@ class VOCDataset(BaseDataset):
         # Matching default boxes to any ground truth box with jaccard overlap higher than a threshold (0.5)
         ious = BoxUtils.pairwise_ious(bboxes, defaultboxes)
         max_ious, max_idxs = ious.max(dim=0)
-
+        
         # Indicator for matching the i-th default box to the j-th ground truth box of category p
         dfbox_idx_pos = torch.where(max_ious > cfg.default_boxes.iou_thresh)[0]
         iou_pos = max_ious[dfbox_idx_pos]
@@ -66,21 +66,21 @@ class VOCDataset(BaseDataset):
         
         dfbox_pos = self.encode_ssd(bboxes_pos, dfbox_pos)
         dfboxes_mask[dfbox_idx_pos] = dfbox_pos
-
-        return dfboxes_mask, dflabels_mask
         
+        return dfboxes_mask, dflabels_mask
+    
     def encode_ssd(self, gt_bboxes, df_bboxes):
         # Simplify the location of default boxes
-        g_cxcy = (gt_bboxes[..., :2] - df_bboxes[..., :2]) / df_bboxes[..., 2:]
-        g_wh = torch.log(gt_bboxes[..., 2:] / df_bboxes[..., 2:])
+        g_cxcy = (gt_bboxes[..., :2] - df_bboxes[..., :2]) / (df_bboxes[..., 2:] * cfg.default_boxes.standard_norms[1])
+        g_wh = torch.log(gt_bboxes[..., 2:] / df_bboxes[..., 2:]) / cfg.default_boxes.standard_norms[0]
         gm = torch.cat((g_cxcy, g_wh), dim=1)
         return gm
     
     def __len__(self): return len(self.voc_dataset)
-
+    
     def __getitem__(self, index):
         image_pth, labels = self.voc_dataset[index]
         class_ids, bboxes = labels[:, 0], labels[:, 1:]
-        image, bboxes, class_ids = self.get_image_label(image_pth, bboxes, class_ids)
-        targets = self.matching_defaulboxes(bboxes, class_ids)
-        return image, targets
+        image, bboxes, class_ids = self.get_image_label(image_pth, bboxes, class_ids, self.is_augment)
+        target_dfboxes = self.matching_defaulboxes(bboxes, class_ids)
+        return image, target_dfboxes, index

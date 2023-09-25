@@ -24,18 +24,22 @@ class Trainer:
         self.create_model()
         self.create_data_loader()
         self.eval = SSDEvaluate(self.valid_dataset, self.model)
-
+    
     def create_data_loader(self):
         self.train_dataset = VOCDataset(cfg.voc_dataset.anno_path, cfg.voc_dataset.image_path, cfg.voc_dataset.train_txt_path, cfg.training.is_augment)
         self.valid_dataset = VOCDataset(cfg.voc_dataset.anno_path, cfg.voc_dataset.image_path, cfg.voc_dataset.val_txt_path, cfg.valid.is_augment)
-        self.train_loader = DataLoader(self.train_dataset, 
+        self.train_loader = DataLoader(self.train_dataset,
                                        batch_size=cfg.training.batch_size, 
                                        shuffle=cfg.training.shuffle,
                                        num_workers=cfg.training.num_workers,
                                        pin_memory=cfg.training.pin_memory)
+        if self.args.debug_mode:
+            Visualizer.debug_augmentation(self.train_dataset)
+            Visualizer.debug_matched_dfboxes(self.valid_dataset, cfg.debug.idxs_debug)
+            Visualizer.debug_dfboxes_generator(self.valid_dataset, cfg.debug.idxs_debug)
         
     def create_model(self):
-        self.model = SSDModel(arch_name=cfg.models.arch_name, pretrained=cfg.models.pretrained).to(cfg.device)
+        self.model = SSDModel(cfg.models.arch_name).to(cfg.device)
         self.loss_fn = SSDLoss()
         self.optimizer = torch.optim.AdamW(self.model.parameters(), lr=cfg.training.lr, amsgrad=True)
 
@@ -47,13 +51,12 @@ class Trainer:
                 self.start_epoch = self.resume_training(ckpt)
                 logger.info(f"Loading checkpoint with start epoch: {self.start_epoch}, best mAP_50: {self.best_map50}")
 
-    
     def train(self):
         for epoch in range(self.start_epoch, cfg.training.epochs):
             mt_reg_loss = BatchMeter()
             mt_cls_loss = BatchMeter()
-
-            for bz, (images, labels) in enumerate(self.train_loader):
+            
+            for bz, (images, labels, __) in enumerate(self.train_loader):
                 self.model.train()
                 images = DataUtils.to_device(images)
                 labels = DataUtils.to_device(labels)
@@ -68,7 +71,7 @@ class Trainer:
 
                 mt_reg_loss.update(reg_loss.item())
                 mt_cls_loss.update(cls_loss.item())
-
+                
                 print(f"Epoch {epoch} Batch {bz+1}/{len(self.train_loader)}, reg_loss: {mt_reg_loss.get_value(): .5f}, class_loss: {mt_cls_loss.get_value():.5f}", end="\r")
 
                 Tensorboard.add_scalars("train_loss",
@@ -77,7 +80,7 @@ class Trainer:
                                         cls_loss=mt_cls_loss.get_value('mean'))
                         
             logger.info(f"Epoch: {epoch} - reg_loss: {mt_reg_loss.get_value('mean'): .5f}, cls_loss: {mt_cls_loss.get_value('mean'): .5f}")
-
+            
             if epoch % cfg.valid.eval_step == 0:
                 metrics = self.eval.evaluate()
                 Tensorboard.add_scalars("eval_loss",
@@ -95,17 +98,18 @@ class Trainer:
                 current_map50 = metrics["eval_map_50"].get_value("mean")
                 if current_map50 > self.best_map50:
                     self.best_map50 = current_map50
-                    best_cpkt_pth = os.path.join(cfg.debug.ckpt_dirpath, self.args.model_type, 'best.pt')
+                    best_cpkt_pth = os.path.join(cfg.debug.ckpt_dirpath, cfg.models.arch_name, 'best.pt')
                     self.save_ckpt(best_cpkt_pth, self.best_map50, epoch)
 
             # Save last checkpoint
-            last_ckpt = os.path.join(cfg.debug.ckpt_dirpath, self.args.model_type, 'last.pt')
+            last_ckpt = os.path.join(cfg.debug.ckpt_dirpath, cfg.models.arch_name, 'last.pt')
             self.save_ckpt(last_ckpt, self.best_map50, epoch)
 
             # Debug after each training epoch
-            Visualizer.debug_output(self.train_dataset, cfg.debug.idxs_debug, self.model, 'train', cfg.debug.training_debug, apply_nms=True)
-            Visualizer.debug_output(self.valid_dataset, cfg.debug.idxs_debug, self.model, 'valid', cfg.debug.valid_debug, apply_nms=True)
-
+            if self.args.debug_mode:
+                Visualizer.debug_output(self.valid_dataset, cfg.debug.idxs_debug, self.model, 'valid', cfg.debug.valid_debug, apply_nms=True)
+                Visualizer.debug_output(self.train_dataset, cfg.debug.idxs_debug, self.model, 'train', cfg.debug.training_debug, apply_nms=True)
+    
     def save_ckpt(self, save_path, best_acc, epoch):
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
         ckpt_dict = {
@@ -128,10 +132,10 @@ class Trainer:
 
 def cli():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--model_type', type=str, default='vgg16',
-                        help='Model selection contain: vgg16, vgg16-bn, resnet18, resnet34, resnet50')
     parser.add_argument('--resume', nargs='?', const=True, default=False, 
                         help='Resume most recent training')
+    parser.add_argument('--debug_mode', nargs='?', const=True, default=cfg.debug.debug_mode, 
+                        help='Turn on debug mode')
     
     args = parser.parse_args()
     return args

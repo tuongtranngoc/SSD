@@ -17,12 +17,10 @@ class SSDHead(nn.Module):
         
         for num_in, num_out in zip(in_channels, out_channels):
             self.cls_confs.append(
-                nn.Conv2d(num_in, num_classes * num_out, kernel_size=3, padding=1, stride=1)
-            )
+                nn.Conv2d(num_in, num_classes * num_out, kernel_size=3, padding=1, stride=1))
             self.reg_boxes.append(
-                nn.Conv2d(num_in, num_out * 4, kernel_size=3, padding=1, stride=1)
-            )
-        
+                nn.Conv2d(num_in, num_out * 4, kernel_size=3, padding=1, stride=1))
+    
     def forward(self, x):
         cls_results = []
         reg_results = []
@@ -39,7 +37,7 @@ class SSDHead(nn.Module):
             reg_out = reg_out.view(N, -1, 4, H, W)
             reg_out = reg_out.permute(0, 3, 4, 1, 2)
             reg_out = reg_out.reshape(N, -1, 4)
-
+            
             reg_results.append(reg_out)
             cls_results.append(cls_out)
 
@@ -47,7 +45,3 @@ class SSDHead(nn.Module):
         reg_results = torch.cat(reg_results, dim=1)
         
         return reg_results, cls_results
-        
-
-
-        
