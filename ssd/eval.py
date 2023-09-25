@@ -118,7 +118,7 @@ def cli():
 if __name__ == "__main__":
     args = cli()
     dataset = VOCDataset(cfg.voc_dataset.anno_path, cfg.voc_dataset.image_path, cfg.voc_dataset.val_txt_path, cfg.valid.is_augment)
-    model = SSDModel(pretrained=False).to(cfg.device)
+    model = SSDModel(cfg.models.arch_name).to(cfg.device)
     ckpt_path = os.path.join(cfg.debug.ckpt_dirpath, args.model_type, args.weight_type)
     ckpt = torch.load(ckpt_path, map_location=cfg.device)
     model.load_state_dict(ckpt["model"])

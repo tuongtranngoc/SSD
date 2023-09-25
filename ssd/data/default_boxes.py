@@ -15,12 +15,12 @@ class DefaultBoxesGenerator:
     s_max = cfg.default_boxes.s_max
     im_size = cfg.models.image_size
     ratios = cfg.default_boxes.aspect_ratio
-    variances = cfg.default_boxes.variances
+    standard_norms = cfg.default_boxes.standard_norms
     dfbox_sizes = cfg.default_boxes.dfboxes_sizes
     # conv4_3, conv10_2, conv11_2 only generate 4 dfboxes
     omitted_ratios = [1/3, 3]
     omitted_fm_sizes = [38, 3, 1]
-        
+    
     @classmethod
     def build_default_boxes(cls):
         df_bboxes = defaultdict()
@@ -43,9 +43,9 @@ class DefaultBoxesGenerator:
             s_k = cls.s_min + (cls.s_max - cls.s_min) * (k - 1) / (len(cls.m) - 1)
             
             for a_r in cls.ratios:
-                if fm_size in cls.omitted_fm_sizes:
-                    if a_r in cls.omitted_ratios:
-                        continue
+                # if fm_size in cls.omitted_fm_sizes:
+                #     if a_r in cls.omitted_ratios:
+                #         continue
                 if a_r == 1:
                     s_k_1 = cls.s_min + (cls.s_max - cls.s_min) * (k + 1 - 1) / (len(cls.m) - 1)
                     s_prime_k = math.sqrt(s_k * s_k_1)

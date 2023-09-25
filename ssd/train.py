@@ -39,7 +39,7 @@ class Trainer:
             Visualizer.debug_dfboxes_generator(self.valid_dataset, cfg.debug.idxs_debug)
         
     def create_model(self):
-        self.model = SSDModel(arch_name=cfg.models.arch_name, pretrained=cfg.models.pretrained).to(cfg.device)
+        self.model = SSDModel(cfg.models.arch_name).to(cfg.device)
         self.loss_fn = SSDLoss()
         self.optimizer = torch.optim.AdamW(self.model.parameters(), lr=cfg.training.lr, amsgrad=True)
 
@@ -55,7 +55,7 @@ class Trainer:
         for epoch in range(self.start_epoch, cfg.training.epochs):
             mt_reg_loss = BatchMeter()
             mt_cls_loss = BatchMeter()
-
+            
             for bz, (images, labels, __) in enumerate(self.train_loader):
                 self.model.train()
                 images = DataUtils.to_device(images)
@@ -80,7 +80,7 @@ class Trainer:
                                         cls_loss=mt_cls_loss.get_value('mean'))
                         
             logger.info(f"Epoch: {epoch} - reg_loss: {mt_reg_loss.get_value('mean'): .5f}, cls_loss: {mt_cls_loss.get_value('mean'): .5f}")
-
+            
             if epoch % cfg.valid.eval_step == 0:
                 metrics = self.eval.evaluate()
                 Tensorboard.add_scalars("eval_loss",

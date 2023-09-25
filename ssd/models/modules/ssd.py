@@ -14,9 +14,9 @@ from . import cfg
 
 
 class SSDModel(nn.Module):
-    def __init__(self, arch_name='vgg16', pretrained=True) -> None:
+    def __init__(self, arch_name) -> None:
         super().__init__()
-        backbone = vgg16_extractor(arch_name, pretrained)
+        backbone = vgg16_extractor(arch_name)
         self.neck = SSDNeck(backbone)
         self.head = SSDHead(cfg.voc_dataset.num_classes, cfg.models.fm_channels, cfg.default_boxes.dfboxes_sizes)
     

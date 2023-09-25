@@ -17,11 +17,9 @@ class SSDHead(nn.Module):
         
         for num_in, num_out in zip(in_channels, out_channels):
             self.cls_confs.append(
-                nn.Conv2d(num_in, num_classes * num_out, kernel_size=3, padding=1, stride=1)
-            )
+                nn.Conv2d(num_in, num_classes * num_out, kernel_size=3, padding=1, stride=1))
             self.reg_boxes.append(
-                nn.Conv2d(num_in, num_out * 4, kernel_size=3, padding=1, stride=1)
-            )
+                nn.Conv2d(num_in, num_out * 4, kernel_size=3, padding=1, stride=1))
     
     def forward(self, x):
         cls_results = []

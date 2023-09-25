@@ -5,7 +5,7 @@ class Configuration:
     
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     models = EasyDict({
-        'arch_name': 'vgg16',
+        'arch_name': 'vgg16_bn',
         'pretrained': True,
         'image_size': 300,
         'fm_channels': [512, 1024, 512, 256, 256, 256]
@@ -13,15 +13,15 @@ class Configuration:
     
     default_boxes = EasyDict({
         'aspect_ratio': [1, 2, 3, 1/2, 1/3],
-        's_min': 0.2,
+        's_min': 0.1,
         's_max': 0.9,
         'fm_sizes': [38, 19, 10, 5, 3, 1],
-        'dfboxes_sizes': [4, 6, 6, 6, 4, 4],
-        'iou_thresh': 0.3,
+        'dfboxes_sizes': [6, 6, 6, 6, 6, 6],
+        'iou_thresh': 0.45,
         'ratio_pos_neg': 3,
         'alpha': 1,
         'label_smooth': 0.1,
-        'variances': [0.1, 0.2]
+        'standard_norms': [0.1, 0.2]
     })
 
     voc_dataset = EasyDict({
@@ -61,9 +61,9 @@ class Configuration:
         "dataset_debug": "exps/dataset",
         "valid_debug": "exps/valid",
         "test_cases": "exps/test_cases",
-        "prediction_debug": "exps/prediction",
+        "prediction": "exps/prediction",
         "ckpt_dirpath": "ssd/weights",
-        "idxs_debug": [0, 1, 2, 3, 4, 5, 6, 7],
+        "idxs_debug": [10, 11, 12, 13, 14, 15, 16, 17],
         "augmentation_debug": "exps/augmentation",
         "log_file": "logs/ssd.log",
         "dfboxes": 'exps/dfboxes',

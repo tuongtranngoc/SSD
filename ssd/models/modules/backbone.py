@@ -1,99 +1,16 @@
 import torch
+import torchvision
 import torch.nn as nn
-from typing import Union, List, Dict, Any, cast
-try:
-    from torch.hub import load_state_dict_from_url
-except ImportError:
-    from torch.utils.model_zoo import load_url as load_state_dict_from_url
 
-model_urls = {
-    'vgg16': 'https://download.pytorch.org/models/vgg16-397923af.pth',
-    'vgg16_bn': 'https://download.pytorch.org/models/vgg16_bn-6c64b313.pth',
+model_weights = {
+    'vgg16': 'VGG16_Weights.DEFAULT',
+    'vgg16_bn': 'VGG16_BN_Weights.DEFAULT'
 }
 
-cfgs: Dict[str, List[Union[str, int]]] = {
-    'A': [64, 'M', 128, 'M', 256, 256, 'M', 512, 512, 'M', 512, 512, 'M'],
-    'B': [64, 64, 'M', 128, 128, 'M', 256, 256, 'M', 512, 512, 'M', 512, 512, 'M'],
-    'D': [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M'],
-    'E': [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 256, 'M', 512, 512, 512, 512, 'M', 512, 512, 512, 512, 'M'],
-}
-
-
-class VGG(nn.Module):
-
-    def __init__(
-        self,
-        features: nn.Module,
-        num_classes: int = 1000,
-        init_weights: bool = True
-    ) -> None:
-        super(VGG, self).__init__()
-        self.features = features
-        self.avgpool = nn.AdaptiveAvgPool2d((7, 7))
-        self.classifier = nn.Sequential(
-            nn.Linear(512 * 7 * 7, 4096),
-            nn.ReLU(True),
-            nn.Dropout(),
-            nn.Linear(4096, 4096),
-            nn.ReLU(True),
-            nn.Dropout(),
-            nn.Linear(4096, num_classes),
-        )
-        if init_weights:
-            self._initialize_weights()
-
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x = self.features(x)
-        x = self.avgpool(x)
-        x = torch.flatten(x, 1)
-        x = self.classifier(x)
-        return x
-
-    def _initialize_weights(self) -> None:
-        for m in self.modules():
-            if isinstance(m, nn.Conv2d):
-                nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
-                if m.bias is not None:
-                    nn.init.constant_(m.bias, 0)
-            elif isinstance(m, nn.BatchNorm2d):
-                nn.init.constant_(m.weight, 1)
-                nn.init.constant_(m.bias, 0)
-            elif isinstance(m, nn.Linear):
-                nn.init.normal_(m.weight, 0, 0.01)
-                nn.init.constant_(m.bias, 0)
-
-
-def make_layers(cfg: List[Union[str, int]], batch_norm: bool = False) -> nn.Sequential:
-    layers: List[nn.Module] = []
-    in_channels = 3
-    for v in cfg:
-        if v == 'M':
-            layers += [nn.MaxPool2d(kernel_size=2, stride=2)]
-        else:
-            v = cast(int, v)
-            conv2d = nn.Conv2d(in_channels, v, kernel_size=3, padding=1)
-            if batch_norm:
-                layers += [conv2d, nn.BatchNorm2d(v), nn.ReLU(inplace=True)]
-            else:
-                layers += [conv2d, nn.ReLU(inplace=True)]
-            in_channels = v
-    return nn.Sequential(*layers)
-
-
-def _vgg(arch: str, cfg: str, batch_norm: bool, pretrained: bool, progress: bool, **kwargs: Any) -> VGG:
-    if pretrained:
-        kwargs['init_weights'] = False
-    model = VGG(make_layers(cfgs[cfg], batch_norm=batch_norm), **kwargs)
-    if pretrained:
-        state_dict = load_state_dict_from_url(model_urls[arch],
-                                              progress=progress)
-        model.load_state_dict(state_dict)
-    return model
-
-
-def vgg16_extractor(pretrained: bool = False, progress: bool = True, **kwargs: Any) -> VGG:
-    return _vgg('vgg16', 'D', False, pretrained, progress, **kwargs).features
-
-
-def vgg16_bn_extractor(pretrained: bool = False, progress: bool = True, **kwargs: Any) -> VGG:
-    return _vgg('vgg16_bn', 'D', True, pretrained, progress, **kwargs).features
+def vgg16_extractor(arch_name):
+    if arch_name == 'vgg16':
+        return torchvision.models.vgg16(weights=model_weights[arch_name]).features
+    elif arch_name == 'vgg16_bn':
+        return torchvision.models.vgg16_bn(weights=model_weights[arch_name]).features
+    else:
+        raise Exception("The model name is not available")
