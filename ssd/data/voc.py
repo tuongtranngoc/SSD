@@ -27,9 +27,9 @@ class VOCDataset(BaseDataset):
 
     def get_image_label(self, image_pth, bboxes, labels, is_aug):
         image = cv2.imread(image_pth)
+        image = image[..., ::-1]
         if is_aug:
             image, bboxes, labels = self.aug(image, bboxes, labels)
-        image = image[..., ::-1]
         image, bboxes, labels = self.__tranform.transform(image, bboxes, labels)
         return image, bboxes, labels
 

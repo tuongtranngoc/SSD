@@ -43,7 +43,9 @@ class Configuration:
         'pin_memory': True,
         'is_augment': True,
         'lr': 1e-4,
-        'epochs': 100,
+        'momentum': 0.9,
+        'weight_decay': 5e-4,
+        'epochs': 121,
     })
 
 
