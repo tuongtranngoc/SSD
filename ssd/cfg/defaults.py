@@ -12,12 +12,12 @@ class Configuration:
     })
     
     default_boxes = EasyDict({
-        'aspect_ratio': [1, 2, 3, 1/2, 1/3],
+        'aspect_ratios': [1, 2, 3, 1/2, 1/3],
         's_min': 0.1,
         's_max': 0.9,
         'fm_sizes': [38, 19, 10, 5, 3, 1],
         'dfboxes_sizes': [6, 6, 6, 6, 6, 6],
-        'iou_thresh': 0.45,
+        'iou_thresh': 0.4,
         'ratio_pos_neg': 3,
         'alpha': 1,
         'label_smooth': 0.1,
@@ -27,6 +27,7 @@ class Configuration:
     voc_dataset = EasyDict({
         'num_classes': 21,
         'mean': [0.485, 0.456, 0.406], 
+        'MEANS': (104, 117, 123),
         'std': [0.229, 0.224, 0.225],
         'classes': 'dataset/VOC/classes.txt',
         'image_path': 'dataset/VOC/images',
@@ -42,7 +43,7 @@ class Configuration:
         'pin_memory': True,
         'is_augment': True,
         'lr': 1e-4,
-        'epochs': 150,
+        'epochs': 100,
     })
 
 
@@ -63,7 +64,7 @@ class Configuration:
         "test_cases": "exps/test_cases",
         "prediction": "exps/prediction",
         "ckpt_dirpath": "ssd/weights",
-        "idxs_debug": [10, 11, 12, 13, 14, 15, 16, 17],
+        "idxs_debug": [20, 21, 22, 23, 24, 25, 26, 27],
         "augmentation_debug": "exps/augmentation",
         "log_file": "logs/ssd.log",
         "dfboxes": 'exps/dfboxes',

@@ -27,16 +27,16 @@ class VOCDataset(BaseDataset):
 
     def get_image_label(self, image_pth, bboxes, labels, is_aug):
         image = cv2.imread(image_pth)
-        image = image[..., ::-1]
         if is_aug:
             image, bboxes, labels = self.aug(image, bboxes, labels)
+        image = image[..., ::-1]
         image, bboxes, labels = self.__tranform.transform(image, bboxes, labels)
         return image, bboxes, labels
 
     def matching_defaulboxes(self, bboxes, class_ids):
         bboxes = torch.tensor(bboxes.copy(), dtype=torch.float32)
         class_ids = torch.tensor(class_ids, dtype=torch.long)
-
+        
         bboxes = BoxUtils.normalize_box(bboxes)
         defaultboxes_dict = DefaultBoxesGenerator.build_default_boxes()
         defaultboxes = DefaultBoxesGenerator.merge_defaultboxes(defaultboxes_dict)

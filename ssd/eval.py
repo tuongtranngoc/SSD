@@ -24,7 +24,7 @@ class SSDEvaluate:
                                     shuffle=cfg.valid.shuffle, 
                                     num_workers=cfg.valid.num_workers,
                                     pin_memory=cfg.valid.pin_memory)
-        self.dfboxes = DefaultBoxesGenerator.default_boxes.to(cfg.device)
+        self.dfboxes = DefaultBoxesGenerator.df_bboxes.to(cfg.device)
 
     def cal_mAP(self, map_mt, pred_bbox, pred_conf, pred_class, gt_bbox, gt_conf, gt_class):
         """Mean Average Precision (mAP)

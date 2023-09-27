@@ -18,7 +18,7 @@ class Tensorboard:
     @classmethod
     def add_debug_images(cls, tag, image, bboxes, labels, step):
         cls.writer.add_image_with_boxes(tag, image, box_tensor=bboxes, global_step=step, labels=labels)
-
+    
     @classmethod
     def add_histogram(cls):
         pass

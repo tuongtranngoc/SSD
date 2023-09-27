@@ -43,8 +43,8 @@ class Visualizer:
     lineType = cv2.LINE_AA
     cvt_ano = AnnotationTool()
     h, w = cfg.models.image_size, cfg.models.image_size
-    dfboxes = DefaultBoxesGenerator.default_boxes.to(cfg.device)
-
+    dfboxes = DefaultBoxesGenerator.df_bboxes.to(cfg.device)
+    
     @classmethod
     def unnormalize_box(cls, bboxes:np.ndarray):
         bboxes = bboxes.copy()
@@ -60,7 +60,7 @@ class Visualizer:
             if conf >= conf_thresh:
                 image = cls.single_draw_object(image, bbox, conf, label, type_obj, unnormalize)
         return image
-
+    
     @classmethod
     def single_draw_object(cls, image, bbox, conf, label,  type_obj=None, unnormalize=False):
         if label == 0: return image
@@ -132,7 +132,7 @@ class Visualizer:
             # Visualize debug images
             image = cls.draw_objects(image, target_bboxes, target_confs, target_labels, cfg.debug.conf_thresh, type_obj='GT', unnormalize=True)
             image = cls.draw_objects(image, pred_bboxes, confs, cates, cfg.debug.conf_thresh, type_obj='PRED', unnormalize=True)
-             
+            
             cv2.imwrite(os.path.join(debug_dir, type_fit, f'{i}.png'), image)
     
     @classmethod

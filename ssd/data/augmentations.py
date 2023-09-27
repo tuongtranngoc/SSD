@@ -11,7 +11,7 @@ from .utils import *
 class AlbumAug:
     def __init__(self) -> None:
         self.transform = A.Compose([
-            A.ToGray(p=0.01),
+            A.ToGray(p=0.3),
             A.HorizontalFlip(p=0.3),
             A.Affine(p=0.3, rotate=15),
             A.BBoxSafeRandomCrop(p=0.3),

@@ -2,10 +2,12 @@ import torch
 import torchvision
 import torch.nn as nn
 
+
 model_weights = {
     'vgg16': 'VGG16_Weights.DEFAULT',
     'vgg16_bn': 'VGG16_BN_Weights.DEFAULT'
 }
+
 
 def vgg16_extractor(arch_name):
     if arch_name == 'vgg16':

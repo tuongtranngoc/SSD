@@ -10,7 +10,7 @@ class Transformation:
         image_size = cfg.models.image_size
         self.transformation = A.Compose([
             A.Resize(image_size, image_size),
-            A.Normalize(),
+            A.Normalize(always_apply=True),
             ToTensorV2()],
         bbox_params=A.BboxParams(format='pascal_voc', label_fields=['labels']))
     
