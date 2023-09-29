@@ -17,7 +17,7 @@ class SSDLoss(nn.Module):
         self.alpha = cfg.default_boxes.alpha
         self.ratio_pos_neg = cfg.default_boxes.ratio_pos_neg
         self.label_smooth = cfg.default_boxes.label_smooth
-    
+
     def forward(self, targets: Tuple[torch.Tensor, torch.Tensor], predictions: Tuple[torch.Tensor, torch.Tensor]):
         gt_bboxes, gt_labels = targets
         pred_bboxes, pred_labels = predictions
@@ -28,9 +28,8 @@ class SSDLoss(nn.Module):
         num_neg = pos_mask.sum(1, keepdim=True) * self.ratio_pos_neg
         box_loss = F.smooth_l1_loss(pred_bboxes[pos_mask], gt_bboxes[pos_mask], reduction='sum')
         conf_loss = F.cross_entropy(pred_labels.view(-1, cfg.voc_dataset.num_classes), 
-                                    gt_labels.view(-1), 
-                                    reduction='none', 
-                                    label_smoothing=self.label_smooth).view(gt_labels.size())
+                                    gt_labels.view(-1),
+                                    reduction='none').view(gt_labels.size())
         # Hard negative mining
         neg_loss = conf_loss.clone()
         neg_loss[pos_mask] = -float('inf')

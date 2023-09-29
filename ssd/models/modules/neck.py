@@ -6,15 +6,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from . import cfg
-
-
-def _xavier_init(conv: nn.Module):
-    for layer in conv.modules():
-        if isinstance(layer, nn.Conv2d):
-            torch.nn.init.xavier_uniform_(layer.weight)
-            if layer.bias is not None:
-                torch.nn.init.constant_(layer.bias, 0.0)
+from . import *
 
 
 class SSDNeck(nn.Module):
@@ -26,7 +18,7 @@ class SSDNeck(nn.Module):
         self.features = nn.Sequential(*backbone[:maxpool4_pos])
         
         # Parameters used for L2 normalization + rescale
-        self.scale_weight = nn.Parameter(torch.ones(cfg.models.fm_channels[0]) * 20)
+        self.scale_weight = nn.Parameter(torch.ones(cfg.models.fm_channels[0]) * 15)
         
         # FC
         fc = nn.Sequential(
@@ -37,7 +29,7 @@ class SSDNeck(nn.Module):
             nn.ReLU(inplace=True)
         )
 
-        # _xavier_init(fc)
+        xavier_init(fc)
         
         # Feature extra layers
         extra_feature_layers = nn.ModuleList([
@@ -71,7 +63,7 @@ class SSDNeck(nn.Module):
             )
         ])
 
-        # _xavier_init(extra_feature_layers)
+        xavier_init(extra_feature_layers)
         
         extra_feature_layers.insert(0, nn.Sequential(*backbone[maxpool4_pos:-1], fc)) # until conv5_3, skip maxpool5
         self.extra_feature_layers = extra_feature_layers

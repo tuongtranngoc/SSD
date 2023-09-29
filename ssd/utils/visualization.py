@@ -197,3 +197,14 @@ class Visualizer:
                 im = cv2.rectangle(im, (int(box[0]), int(box[1])), (int(box[2]), int(box[3])), color=(255, 0, 0), thickness=cls.thickness)
                 im = cv2.putText(im, str(anno_cvt.id2class(int(label))), (int(box[0]), int(box[1]+0.025*cls.w)), fontFace=0, fontScale=cls.thickness/2, color=(255, 0, 0), thickness=cls.thickness)
             cv2.imwrite(os.path.join(cfg.debug.augmentation_debug, f'{os.path.basename(im_pth)}'), im)
+
+    @classmethod
+    def debug_arch_model(cls, model):
+        from torchview import draw_graph
+        x = torch.randn(size=(3, cfg.model.image_size, cfg.models.image_size)).to(cfg.device)
+        ssd = model.to(cfg.device)
+        draw_graph(ssd, input_size=x.unsqueeze(0).shape, 
+                   expand_nested=True, 
+                   save_graph=True, 
+                   directory=cfg.debug.arch_model, 
+                   graph_name=cfg.models.arch_name)

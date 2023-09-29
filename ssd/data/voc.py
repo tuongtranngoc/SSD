@@ -24,7 +24,7 @@ class VOCDataset(BaseDataset):
         self.is_augment = is_augment
         self.voc_dataset = self.load_voc_dataset()
         self.__tranform = Transformation()
-
+    
     def get_image_label(self, image_pth, bboxes, labels, is_aug):
         image = cv2.imread(image_pth)
         image = image[..., ::-1]

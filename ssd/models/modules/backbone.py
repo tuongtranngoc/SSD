@@ -8,7 +8,6 @@ model_weights = {
     'vgg16_bn': 'VGG16_BN_Weights.DEFAULT'
 }
 
-
 def vgg16_extractor(arch_name):
     if arch_name == 'vgg16':
         return torchvision.models.vgg16(weights=model_weights[arch_name]).features
