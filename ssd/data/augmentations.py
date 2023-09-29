@@ -6,7 +6,6 @@ import cv2
 import numpy as np
 import albumentations as A
 import albumentations.augmentations.functional as F
-from albumentations.core.transforms_interface import BasicTransform
 
 from .utils import *
 

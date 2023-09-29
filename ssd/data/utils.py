@@ -20,3 +20,18 @@ class Transformation:
         transformed_bboxes = np.array(transformed['bboxes'], dtype=np.float32)
         transformed_labels = np.array(transformed['labels'])
         return transformed_image, transformed_bboxes, transformed_labels
+    
+
+def intersect(box_a, box_b):
+    max_xy = np.minimum(box_a[:, 2:], box_b[2:])
+    min_xy = np.maximum(box_a[:, :2], box_b[:2])
+    inter = np.clip((max_xy - min_xy), a_min=0, a_max=np.inf)
+    return inter[:, 0] * inter[:, 1]
+
+
+def box_iou(box_a, box_b)->np.ndarray:
+    inter = intersect(box_a, box_b)
+    area_a = ((box_a[:, 2]-box_a[:, 0]) * (box_a[:, 3]-box_a[:, 1])) 
+    area_b = ((box_b[2]-box_b[0]) * (box_b[3]-box_b[1]))  
+    union = area_a + area_b - inter
+    return inter / union 
