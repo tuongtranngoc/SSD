@@ -41,7 +41,7 @@ class DefaultBoxesGenerator:
             
             for a_r in cls.aspect_ratios:
                 if a_r == 1:
-                    s_k_1 = cls.s_min + (cls.s_max - cls.s_min) * (k + 1 - 1) / (len(cls.m) - 1)
+                    s_k_1 = cls.s_min + (cls.s_max - cls.s_min) * (k - 1 + 1) / (len(cls.m) - 1)
                     s_prime_k = math.sqrt(s_k * s_k_1)
                     wh_ratios.extend([[s_k, s_k], [s_prime_k, s_prime_k]])
                 else:

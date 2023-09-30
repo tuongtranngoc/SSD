@@ -201,7 +201,7 @@ class Visualizer:
     @classmethod
     def debug_arch_model(cls, model):
         from torchview import draw_graph
-        x = torch.randn(size=(3, cfg.model.image_size, cfg.models.image_size)).to(cfg.device)
+        x = torch.randn(size=(3, cfg.models.image_size, cfg.models.image_size)).to(cfg.device)
         ssd = model.to(cfg.device)
         draw_graph(ssd, input_size=x.unsqueeze(0).shape, 
                    expand_nested=True, 
