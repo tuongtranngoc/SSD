@@ -24,7 +24,7 @@ class SSDEvaluate:
                                     shuffle=cfg.valid.shuffle, 
                                     num_workers=cfg.valid.num_workers,
                                     pin_memory=cfg.valid.pin_memory)
-        self.dfboxes = DefaultBoxesGenerator.default_boxes.to(cfg.device)
+        self.dfboxes = DefaultBoxesGenerator.df_bboxes.to(cfg.device)
 
     def cal_mAP(self, map_mt, pred_bbox, pred_conf, pred_class, gt_bbox, gt_conf, gt_class):
         """Mean Average Precision (mAP)
@@ -64,7 +64,7 @@ class SSDEvaluate:
                     target_labels, target_bboxes = targets[:, 0], targets[:, 1:]
                     target_confs = np.ones_like(target_labels, dtype=np.float32)
                     pred_bboxes, pred_confs = bpred_bboxes[j], bpred_confs[j]
-
+                    
                     # Normalize bboxes and to tensor
                     image, target_bboxes, target_labels = self.dataset.get_image_label(img_path, target_bboxes, target_labels, False)
                     target_bboxes = torch.tensor(target_bboxes, dtype=torch.float32, device=cfg.device)
@@ -105,8 +105,8 @@ class SSDEvaluate:
     
 def cli():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--weight_type', type=str, default='last.pt', help='Types of the model weight: best.pt/last.pt')
-    parser.add_argument('--model_type', type=str, default='vgg16', help='Model selection: vgg16, vgg16-bn, resnet34, resnet50')
+    parser.add_argument('--weight_type', type=str, default='best.pt', help='Types of the model weight: best.pt/last.pt')
+    parser.add_argument('--model_type', type=str, default='vgg16_bn', help='Model selection: vgg16, vgg16-bn, resnet34, resnet50')
     parser.add_argument('--batch_size', type=int, default=cfg.valid.batch_size, help='Batch size of evaluation')
     parser.add_argument('--conf_thresh', type=float, default=cfg.debug.conf_thresh, help='Confidence threshold for evaluation')
     parser.add_argument('--iou_thresh', type=float, default=cfg.debug.iou_thresh, help='Iou threshold for evaluation')

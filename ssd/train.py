@@ -42,14 +42,17 @@ class Trainer:
         self.model = SSDModel(cfg.models.arch_name).to(cfg.device)
         self.loss_fn = SSDLoss()
         self.optimizer = torch.optim.AdamW(self.model.parameters(), lr=cfg.training.lr, amsgrad=True)
-
+        
         if self.args.resume:
             logger.info("Resuming training ...")
-            last_ckpt = os.path.join(cfg.debug.ckpt_dirpath, self.args.model_type, 'last.pt')
+            last_ckpt = os.path.join(cfg.debug.ckpt_dirpath, cfg.models.arch_name, 'last.pt')
             if os.path.exists(last_ckpt):
                 ckpt = torch.load(last_ckpt, map_location=cfg.device)
                 self.start_epoch = self.resume_training(ckpt)
                 logger.info(f"Loading checkpoint with start epoch: {self.start_epoch}, best mAP_50: {self.best_map50}")
+
+        if args.debug_mode:
+            Visualizer.debug_arch_model(self.model)
 
     def train(self):
         for epoch in range(self.start_epoch, cfg.training.epochs):
@@ -74,8 +77,7 @@ class Trainer:
                 
                 print(f"Epoch {epoch} Batch {bz+1}/{len(self.train_loader)}, reg_loss: {mt_reg_loss.get_value(): .5f}, class_loss: {mt_cls_loss.get_value():.5f}", end="\r")
 
-                Tensorboard.add_scalars("train_loss",
-                                        epoch,
+                Tensorboard.add_scalars("train_loss", epoch,
                                         reg_loss=mt_reg_loss.get_value('mean'),
                                         cls_loss=mt_cls_loss.get_value('mean'))
                         
@@ -83,13 +85,11 @@ class Trainer:
             
             if epoch % cfg.valid.eval_step == 0:
                 metrics = self.eval.evaluate()
-                Tensorboard.add_scalars("eval_loss",
-                                        epoch,
+                Tensorboard.add_scalars("eval_loss", epoch,
                                         reg_loss=metrics["eval_reg_loss"].get_value("mean"),
                                         cls_loss=metrics["eval_cls_loss"].get_value("mean"))
                 
-                Tensorboard.add_scalars("eval_mAP",
-                                        epoch,
+                Tensorboard.add_scalars("eval_mAP", epoch,
                                         map=metrics["eval_map"].get_value("mean"),
                                         map_50=metrics["eval_map_50"].get_value("mean"),
                                         map_75=metrics["eval_map_75"].get_value("mean"))

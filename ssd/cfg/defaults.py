@@ -1,5 +1,6 @@
 from easydict import EasyDict
 import torch
+import os
 
 class Configuration:
     
@@ -12,16 +13,16 @@ class Configuration:
     })
     
     default_boxes = EasyDict({
-        'aspect_ratio': [1, 2, 3, 1/2, 1/3],
-        's_min': 0.1,
+        'aspect_ratios': [1, 2, 3, 1/2, 1/3],
+        's_min': 0.2,
         's_max': 0.9,
         'fm_sizes': [38, 19, 10, 5, 3, 1],
         'dfboxes_sizes': [6, 6, 6, 6, 6, 6],
-        'iou_thresh': 0.45,
+        'iou_thresh': 0.4,
         'ratio_pos_neg': 3,
         'alpha': 1,
         'label_smooth': 0.1,
-        'standard_norms': [0.1, 0.2]
+        'standard_norms': [0.2, 0.1]
     })
 
     voc_dataset = EasyDict({
@@ -39,10 +40,12 @@ class Configuration:
         'batch_size': 32,
         'shuffle': True,
         'num_workers': 8,
-        'pin_memory': True,
+        'pin_memory': False,
         'is_augment': True,
         'lr': 1e-4,
-        'epochs': 150,
+        'momentum': 0.9,
+        'weight_decay': 5e-4,
+        'epochs': 121,
     })
 
 
@@ -63,7 +66,8 @@ class Configuration:
         "test_cases": "exps/test_cases",
         "prediction": "exps/prediction",
         "ckpt_dirpath": "ssd/weights",
-        "idxs_debug": [10, 11, 12, 13, 14, 15, 16, 17],
+        "arch_model": "outputs",
+        "idxs_debug": [20, 21, 22, 23, 24, 25, 26, 27],
         "augmentation_debug": "exps/augmentation",
         "log_file": "logs/ssd.log",
         "dfboxes": 'exps/dfboxes',

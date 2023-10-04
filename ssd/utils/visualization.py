@@ -43,8 +43,8 @@ class Visualizer:
     lineType = cv2.LINE_AA
     cvt_ano = AnnotationTool()
     h, w = cfg.models.image_size, cfg.models.image_size
-    dfboxes = DefaultBoxesGenerator.default_boxes.to(cfg.device)
-
+    dfboxes = DefaultBoxesGenerator.df_bboxes.to(cfg.device)
+    
     @classmethod
     def unnormalize_box(cls, bboxes:np.ndarray):
         bboxes = bboxes.copy()
@@ -60,7 +60,7 @@ class Visualizer:
             if conf >= conf_thresh:
                 image = cls.single_draw_object(image, bbox, conf, label, type_obj, unnormalize)
         return image
-
+    
     @classmethod
     def single_draw_object(cls, image, bbox, conf, label,  type_obj=None, unnormalize=False):
         if label == 0: return image
@@ -132,7 +132,7 @@ class Visualizer:
             # Visualize debug images
             image = cls.draw_objects(image, target_bboxes, target_confs, target_labels, cfg.debug.conf_thresh, type_obj='GT', unnormalize=True)
             image = cls.draw_objects(image, pred_bboxes, confs, cates, cfg.debug.conf_thresh, type_obj='PRED', unnormalize=True)
-             
+            
             cv2.imwrite(os.path.join(debug_dir, type_fit, f'{i}.png'), image)
     
     @classmethod
@@ -197,3 +197,14 @@ class Visualizer:
                 im = cv2.rectangle(im, (int(box[0]), int(box[1])), (int(box[2]), int(box[3])), color=(255, 0, 0), thickness=cls.thickness)
                 im = cv2.putText(im, str(anno_cvt.id2class(int(label))), (int(box[0]), int(box[1]+0.025*cls.w)), fontFace=0, fontScale=cls.thickness/2, color=(255, 0, 0), thickness=cls.thickness)
             cv2.imwrite(os.path.join(cfg.debug.augmentation_debug, f'{os.path.basename(im_pth)}'), im)
+
+    @classmethod
+    def debug_arch_model(cls, model):
+        from torchview import draw_graph
+        x = torch.randn(size=(3, cfg.models.image_size, cfg.models.image_size)).to(cfg.device)
+        ssd = model.to(cfg.device)
+        draw_graph(ssd, input_size=x.unsqueeze(0).shape, 
+                   expand_nested=True, 
+                   save_graph=True, 
+                   directory=cfg.debug.arch_model, 
+                   graph_name=cfg.models.arch_name)

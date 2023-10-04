@@ -137,7 +137,7 @@ class DataUtils:
         image += (mean * 255.)
         image = np.clip(image, 0, 255.)
         return image
-        
+    
     @classmethod
     def image_to_numpy(cls, image):
         if isinstance(image, torch.Tensor):
