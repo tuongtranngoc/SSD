@@ -45,7 +45,7 @@ class Trainer:
         
         if self.args.resume:
             logger.info("Resuming training ...")
-            last_ckpt = os.path.join(cfg.debug.ckpt_dirpath, self.args.model_type, 'last.pt')
+            last_ckpt = os.path.join(cfg.debug.ckpt_dirpath, cfg.models.arch_name, 'last.pt')
             if os.path.exists(last_ckpt):
                 ckpt = torch.load(last_ckpt, map_location=cfg.device)
                 self.start_epoch = self.resume_training(ckpt)

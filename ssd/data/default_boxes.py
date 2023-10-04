@@ -38,7 +38,7 @@ class DefaultBoxesGenerator:
             
             wh_ratios = []
             s_k = cls.s_min + (cls.s_max - cls.s_min) * (k - 1) / (len(cls.m) - 1)
-            
+                
             for a_r in cls.aspect_ratios:
                 if a_r == 1:
                     s_k_1 = cls.s_min + (cls.s_max - cls.s_min) * (k - 1 + 1) / (len(cls.m) - 1)

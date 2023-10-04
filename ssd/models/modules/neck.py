@@ -18,7 +18,7 @@ class SSDNeck(nn.Module):
         self.features = nn.Sequential(*backbone[:maxpool4_pos])
         
         # Parameters used for L2 normalization + rescale
-        self.scale_weight = nn.Parameter(torch.ones(cfg.models.fm_channels[0]) * 15)
+        self.scale_weight = nn.Parameter(torch.ones(cfg.models.fm_channels[0]) * 20)
         
         # FC
         fc = nn.Sequential(

@@ -35,7 +35,7 @@ class SSDHead(nn.Module):
                 out = module(x)
             i += 1
         return out
-    
+
     def forward(self, x):
         cls_results = []
         reg_results = []
@@ -55,7 +55,7 @@ class SSDHead(nn.Module):
             
             reg_results.append(reg_out)
             cls_results.append(cls_out)
-        
+            
         cls_results = torch.cat(cls_results, dim=1)
         reg_results = torch.cat(reg_results, dim=1)
         

@@ -32,7 +32,7 @@ class VOCDataset(BaseDataset):
             image, bboxes, labels = self.aug(image, bboxes, labels)
         image, bboxes, labels = self.__tranform.transform(image, bboxes, labels)
         return image, bboxes, labels
-
+    
     def matching_defaulboxes(self, bboxes, class_ids):
         bboxes = torch.tensor(bboxes.copy(), dtype=torch.float32)
         class_ids = torch.tensor(class_ids, dtype=torch.long)
