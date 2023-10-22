@@ -28,8 +28,8 @@ class SSDNeck(nn.Module):
             nn.Conv2d(in_channels=1024, out_channels=1024, kernel_size=1),  # FC7
             nn.ReLU(inplace=True)
         )
-
-        xavier_init(fc)
+        
+        # xavier_init(fc)
         
         # Feature extra layers
         extra_feature_layers = nn.ModuleList([
@@ -63,7 +63,7 @@ class SSDNeck(nn.Module):
             )
         ])
 
-        xavier_init(extra_feature_layers)
+        # xavier_init(extra_feature_layers)
         
         extra_feature_layers.insert(0, nn.Sequential(*backbone[maxpool4_pos:-1], fc)) # until conv5_3, skip maxpool5
         self.extra_feature_layers = extra_feature_layers

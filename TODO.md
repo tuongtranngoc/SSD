@@ -7,7 +7,7 @@
 5. <del>Implement the network
 6. <del>Tensorboard
 7. <del>Logging
-8. Write blog on github.io ()
+8. Write blog on github.io (writing ...)
 9. Implement traing and valid with Pytorch Lightning
 10. DVC, MLFlow
 11. GIOU, DIoU loss

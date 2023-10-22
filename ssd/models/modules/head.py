@@ -21,27 +21,15 @@ class SSDHead(nn.Module):
             self.reg_boxes.append(
                 nn.Conv2d(num_in, num_out * 4, kernel_size=3, padding=1, stride=1))
         
-        xavier_init(self.cls_confs)
-        xavier_init(self.reg_boxes)
-
-    def _get_result_from_module_list(self, x: torch.Tensor, idx: int, module_list: nn.Module) -> torch.Tensor:
-        num_blocks = len(module_list)
-        if idx < 0:
-            idx += num_blocks
-        i = 0
-        out = x
-        for module in module_list:
-            if i == idx:
-                out = module(x)
-            i += 1
-        return out
-
+        # xavier_init(self.cls_confs)
+        # xavier_init(self.reg_boxes)
+    
     def forward(self, x):
         cls_results = []
         reg_results = []
-        for i, input in enumerate(x):
-            cls_out = self._get_result_from_module_list(input, i, self.cls_confs)
-            reg_out = self._get_result_from_module_list(input, i, self.reg_boxes)
+        for input, cls_module, reg_module in zip(x, self.cls_confs, self.reg_boxes):
+            cls_out = cls_module(input)
+            reg_out = reg_module(input)
             
             N, _, H, W = cls_out.shape
             
