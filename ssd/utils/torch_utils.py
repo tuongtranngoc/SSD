@@ -17,23 +17,20 @@ class BoxUtils:
     @classmethod
     def xcycwh_to_xyxy(cls, bboxes:torch.Tensor):
         bboxes = bboxes.clone()
-        x1y1 = bboxes[..., :2] - bboxes[..., 2:] / 2
-        x2y2 = bboxes[..., :2] + bboxes[..., 2:] / 2
+        bboxes[..., [0, 1]] = bboxes[..., :2] - bboxes[..., 2:] / 2
+        bboxes[..., [2, 3]] = bboxes[..., :2] + bboxes[..., 2:] / 2
+        bboxes = torch.clamp(bboxes, min=0, max=1.0)
 
-        x1y1x2y2 = torch.cat((x1y1, x2y2), dim=1)
-        x1y1x2y2 = torch.clamp(x1y1x2y2, min=0, max=1.0)
-
-        return x1y1x2y2
+        return bboxes
     
     @classmethod
     def xyxy_to_xcycwh(cls, bboxes: torch.Tensor):
         bboxes = bboxes.clone()
-        wh = bboxes[..., 2:] - bboxes[..., :2]
-        xcyc = bboxes[..., 2:] - wh / 2.0
-        xcyxwh = torch.cat((xcyc, wh), dim=1)
-        xcyxwh = torch.clamp(xcyxwh, min=0, max=1.0)
+        bboxes[..., [2, 3]] = bboxes[..., 2:] - bboxes[..., :2]
+        bboxes[..., [0, 1]] = bboxes[..., 2:] - bboxes[..., [2, 3]] / 2.0
+        bboxes = torch.clamp(bboxes, min=0, max=1.0)
 
-        return xcyxwh
+        return bboxes
     
     @classmethod
     def pairwise_ious(cls, x:torch.Tensor, y:torch.Tensor):
@@ -55,10 +52,9 @@ class BoxUtils:
         dfboxes = dfboxes.to(pred_bboxes.device)
         pred_bboxes = pred_bboxes.clone()
         # transform offset into cxcywh
-        xcyc = pred_bboxes[..., :2] * (dfboxes[..., 2:] * cfg.default_boxes.standard_norms[1]) + dfboxes[..., :2]
-        wh = torch.exp(pred_bboxes[..., 2:] * cfg.default_boxes.standard_norms[0]) * dfboxes[..., 2:]
-        xcycwh = torch.cat((xcyc, wh), dim=1)
-        return xcycwh
+        pred_bboxes[..., [0, 1]] = pred_bboxes[..., [0, 1]] * (dfboxes[..., [2, 3]] * cfg.default_boxes.standard_norms[1]) + dfboxes[..., [0, 1]]
+        pred_bboxes[..., [2, 3]] = torch.exp(pred_bboxes[..., [2, 3]] * cfg.default_boxes.standard_norms[0]) * dfboxes[..., [2, 3]]
+        return pred_bboxes
     
     @classmethod
     def normalize_box(cls, bboxes:torch.Tensor):

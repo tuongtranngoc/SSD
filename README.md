@@ -17,7 +17,7 @@
 | Backbone | Dataset | Training dataset | Valid dataset | Image size | mAP | mAP_50 | mAP_75 |
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 |Original paper|PASCAL VOC|trainval 2007+2012|test2007|300x300|--|--|--|
-|VGG16-BN|PASCAL VOC|trainval 2007+2012|test2007|300x300|--|--|--|
+|Our implementation (VGG16+DIoU)|PASCAL VOC|trainval 2007+2012|test2007|300x300|--|--|--|
 
 ## Dataset
 + Download Pascal VOC train+val 2012+2007

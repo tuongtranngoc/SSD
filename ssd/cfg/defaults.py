@@ -6,7 +6,7 @@ class Configuration:
     
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     models = EasyDict({
-        'arch_name': 'vgg16_bn',
+        'arch_name': 'vgg16',
         'pretrained': True,
         'image_size': 300,
         'fm_channels': [512, 1024, 512, 256, 256, 256]
@@ -41,7 +41,7 @@ class Configuration:
         'shuffle': True,
         'num_workers': 8,
         'pin_memory': False,
-        'is_augment': True,
+        'is_augment': False,
         'lr': 1e-4,
         'momentum': 0.9,
         'weight_decay': 5e-4,
@@ -71,8 +71,8 @@ class Configuration:
         "augmentation_debug": "exps/augmentation",
         "log_file": "logs/ssd.log",
         "dfboxes": 'exps/dfboxes',
-        "iou_thresh": 0.5,
-        "conf_thresh": 0.65,
+        "iou_thresh": 0.45,
+        "conf_thresh": 0.5,
         "matched_dfboxes": "exps/matched_dfboxes",
         "dfboxes_generator": "exps/dfboxes_generator",
         "debug_mode": True,
