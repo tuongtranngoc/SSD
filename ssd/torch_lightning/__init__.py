@@ -1,2 +1,2 @@
-from ssd.data.coco import COCODataset
+from ..data.voc import VOCDataset
 from ssd.cfg.defaults import Configuration as cfg

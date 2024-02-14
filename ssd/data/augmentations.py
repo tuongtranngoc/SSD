@@ -5,7 +5,6 @@ from __future__ import absolute_import
 import cv2
 import numpy as np
 import albumentations as A
-import albumentations.augmentations.functional as F
 
 from .utils import *
 
@@ -13,34 +12,34 @@ from .utils import *
 class AlbumAug:
     def __init__(self) -> None:
         self.random_iou_crop = RandomIouCrop()
-        self.__transforms = A.Compose(transforms=[
-            A.ToGray(p=0.1),
-            A.HorizontalFlip(p=0.3),
-            A.Affine(p=0.3, rotate=15),
+        self.__transform = A.Compose([
             A.BBoxSafeRandomCrop(p=0.3),
-            A.Blur(p=0.3, blur_limit=5),
+            A.HorizontalFlip(p=0.5),
+            A.Affine(p=0.3, rotate=15),
+            A.ShiftScaleRotate(p=0.2, rotate_limit=15),
+            A.HueSaturationValue(hue_shift_limit=20, sat_shift_limit=20, val_shift_limit=20),
+            # A.ToGray(p=0.01),
+            A.Blur(p=0.01, blur_limit=5),
+            A.MedianBlur(p=0.01, blur_limit=5),
             A.RandomBrightnessContrast(p=0.3),
-            A.MedianBlur(p=0.1, blur_limit=5),
-            A.ShiftScaleRotate(p=0.3, rotate_limit=15),
-            A.HueSaturationValue(hue_shift_limit=20, sat_shift_limit=20, val_shift_limit=20, p=0.3),
             ],
-        bbox_params=A.BboxParams(format='pascal_voc', label_fields=['labels'], min_visibility=0.3))
+        bbox_params=A.BboxParams(format='pascal_voc', label_fields=['labels'], min_visibility=0.1))
     
     def __call__(self, image, bboxes, labels):
-        image, bboxes, labels = self.random_iou_crop(image, bboxes, labels)
-        transformed = self.__transforms(image=image, bboxes=bboxes, labels=labels)
+        # image, bboxes, labels = self.random_iou_crop(image, bboxes, labels)
+        transformed = self.__transform(image=image, bboxes=bboxes, labels=labels)
         transformed_image = transformed['image']
-        transformed_bboxes = np.array(transformed['bboxes'], dtype=np.float32)
-        transformed_labels = np.array(transformed['labels'], dtype=np.float32)
+        transformed_bboxes = np.array(transformed['bboxes'])
         if transformed_bboxes.shape[0] == 0:
             return image, bboxes, labels
+        transformed_labels = np.array(transformed['labels'])
         return transformed_image, transformed_bboxes, transformed_labels
 
 
 class RandomIouCrop:
-    def __init__(self, p: float = 0.5, min_scale: float = 0.3,
+    def __init__(self, p: float = 0.5, min_scale: float = 0.5,
                  max_scale: float = 1.0, min_aspect_ratio: float = 0.5, max_aspect_ratio: float = 2.0,
-                 sampler_options = None, trials: int = 40):
+                 sampler_options = None, trials: int = 30):
         self.min_scale = min_scale
         self.max_scale = max_scale
         self.min_aspect_ratio = min_aspect_ratio
@@ -55,8 +54,6 @@ class RandomIouCrop:
         if np.random.uniform(0, 1) < self.p:
             return img, bboxes, labels
         img = img.copy()
-        bboxes = bboxes.copy()
-        labels = labels.copy()
         orig_w, orig_h = img.shape[:2]
         while True:
             idx = int(np.random.randint(low=0, high=len(self.options), size=(1,)))
