@@ -18,7 +18,7 @@ class AlbumAug:
             A.Affine(p=0.3, rotate=15),
             A.ShiftScaleRotate(p=0.2, rotate_limit=15),
             A.HueSaturationValue(hue_shift_limit=20, sat_shift_limit=20, val_shift_limit=20),
-            A.ToGray(p=0.01),
+            # A.ToGray(p=0.01),
             A.Blur(p=0.01, blur_limit=5),
             A.MedianBlur(p=0.01, blur_limit=5),
             A.RandomBrightnessContrast(p=0.3),
@@ -26,7 +26,7 @@ class AlbumAug:
         bbox_params=A.BboxParams(format='pascal_voc', label_fields=['labels'], min_visibility=0.1))
     
     def __call__(self, image, bboxes, labels):
-        image, bboxes, labels = self.random_iou_crop(image, bboxes, labels)
+        # image, bboxes, labels = self.random_iou_crop(image, bboxes, labels)
         transformed = self.__transform(image=image, bboxes=bboxes, labels=labels)
         transformed_image = transformed['image']
         transformed_bboxes = np.array(transformed['bboxes'])

@@ -39,7 +39,7 @@ class Trainer:
         
     def create_model(self):
         self.model = SSDModel(cfg.models.arch_name).to(cfg.device)
-        self.loss_fn = SSDLoss(giou=True)
+        self.loss_fn = SSDLoss()
         self.optimizer = torch.optim.AdamW(self.model.parameters(), lr=cfg.training.lr, amsgrad=True)
         
         if self.args.resume:

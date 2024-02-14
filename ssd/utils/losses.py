@@ -22,7 +22,7 @@ class IoULoss:
         """
         target_bboxes = target_bboxes.clone()
         pred_bboxes = pred_bboxes.clone()
-
+        
         target_bboxes = BoxUtils.decode_ssd(target_bboxes, cls.dfboxes)
         pred_bboxes = BoxUtils.decode_ssd(pred_bboxes, cls.dfboxes)
         target_bboxes = BoxUtils.xcycwh_to_xyxy(target_bboxes)
@@ -114,7 +114,7 @@ class SSDLoss(nn.Module):
         # Numer of negative
         num_neg = pos_mask.sum(1, keepdim=True) * self.ratio_pos_neg
         num_pos = max(1, num_pos)
-
+        
         if self.giou:
             box_loss = 1.0 - IoULoss.giou_loss(gt_bboxes, pred_bboxes)
             reg_loss = box_loss[pos_mask].sum() / num_pos
@@ -124,10 +124,11 @@ class SSDLoss(nn.Module):
         else:
             box_loss = F.smooth_l1_loss(pred_bboxes, gt_bboxes, reduction='sum')
             reg_loss = box_loss.sum() / num_pos
-
+        
         conf_loss = F.cross_entropy(pred_labels.view(-1, cfg.voc_dataset.num_classes), 
                                     gt_labels.view(-1),
                                     reduction='none').view(gt_labels.size())
+        
         # Hard negative mining
         neg_loss = conf_loss.clone()
         neg_loss[pos_mask] = -float('inf')

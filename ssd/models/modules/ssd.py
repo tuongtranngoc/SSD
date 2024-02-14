@@ -19,7 +19,7 @@ class SSDModel(nn.Module):
         backbone = feature_extractor(arch_name)
         self.neck = SSDNeck(backbone)
         self.head = SSDHead(cfg.voc_dataset.num_classes, cfg.models.fm_channels, cfg.default_boxes.dfboxes_sizes)
-    
+        
     def forward(self, x):
         x = self.neck(x)
         x = self.head(x)
