@@ -11,7 +11,6 @@ SSD is simply relative to methods that require object proposals because it elimi
   </p>
 </div>
 
-0.371, mAP_50:  0.622, mAP_75:  0.396
 
 ## Experiment Table
 
