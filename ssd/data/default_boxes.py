@@ -58,7 +58,7 @@ class DefaultBoxesGenerator:
     @classmethod
     def merge_defaultboxes(cls, dfboxes_dict:dict):
         df_bboxes = []
-        for fm, dfbox in dfboxes_dict.items():
+        for __, dfbox in dfboxes_dict.items():
             dfbox = dfbox.reshape(-1, 4)
             df_bboxes.append(dfbox)
         cls.df_bboxes = torch.cat(df_bboxes, dim=0)

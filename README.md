@@ -1,8 +1,8 @@
-# This project aims to implement SSD algorithm
+# This project aims to implement an SSD algorithm
 
 ## Introduction
-+ SSD is simple relative to methods that require object proposals because it completely eliminates proposal generation and subsequent pixel or feature resampling stages and escapsulates all computation in a single network
-+ SSD discreties the output space of bounding boxes into a set of default boxes over difference aspect ratios and scales per future map location
+SSD is simply relative to methods that require object proposals because it eliminates proposal generation and subsequent pixel or feature resampling stages and encapsulates all computation in a single network
++ SSD discretizes the output space of bounding boxes into a set of default boxes over different aspect ratios and scales per future map location
 
 <div align="center">
   <p>
@@ -11,19 +11,20 @@
   </p>
 </div>
 
+0.371, mAP_50:  0.622, mAP_75:  0.396
 
 ## Experiment Table
 
 | Backbone | Dataset | Training dataset | Valid dataset | Image size | mAP | mAP_50 | mAP_75 |
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-|Original paper|PASCAL VOC|trainval 2007+2012|test2007|300x300|--|--|--|
-|Our implementation (VGG16+DIoU)|PASCAL VOC|trainval 2007+2012|test2007|300x300|--|--|--|
+|Original paper|PASCAL VOC|trainval 2007+2012|test2007|300x300|--|74.3|--|
+|Our implementation|PASCAL VOC|trainval 2007+2012|test2007|300x300|3.71|62.2|39.6|
 
 ## Dataset
 + Download Pascal VOC train+val 2012+2007
 + Download Pascal VOC test 2007
 
-Put all images, annotations, txt files in folder `dataset/VOC` folder as following:
+Put all images, annotations, and `.txt` files in folder `dataset/VOC` folder as follows:
 
 ```shell
 ├── VOC

@@ -33,7 +33,7 @@ class SSDEvaluate:
         preds = [{"boxes": pred_bbox, "scores": pred_conf, "labels": pred_class}]
         
         target = [{"boxes": gt_bbox, "scores": gt_conf, "labels": gt_class}]
-
+        
         map_mt.update(preds, target)
 
     def evaluate(self):

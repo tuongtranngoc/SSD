@@ -119,7 +119,7 @@ class Trainer:
         }
         logger.info(f"Saving checkpoint to {save_path}")
         torch.save(ckpt_dict, save_path)
-
+    
     def resume_training(self, ckpt):
         self.best_map50 = ckpt['best_map50']
         start_epoch = ckpt['epoch'] + 1
