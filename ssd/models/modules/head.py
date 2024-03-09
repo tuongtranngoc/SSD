@@ -21,8 +21,8 @@ class SSDHead(nn.Module):
             self.reg_boxes.append(
                 nn.Conv2d(num_in, num_out * 4, kernel_size=3, padding=1, stride=1))
         
-        # xavier_init(self.cls_confs)
-        # xavier_init(self.reg_boxes)
+        xavier_init(self.cls_confs)
+        xavier_init(self.reg_boxes)
     
     def forward(self, x):
         cls_results = []

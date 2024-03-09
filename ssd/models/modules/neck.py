@@ -63,7 +63,7 @@ class SSDNeck(nn.Module):
             )
         ])
         
-        # xavier_init(extra_feature_layers)
+        xavier_init(extra_feature_layers)
         
         extra_feature_layers.insert(0, nn.Sequential(*backbone[maxpool4_pos:-1], fc)) # until conv5_3, skip maxpool5
         self.extra_feature_layers = extra_feature_layers
