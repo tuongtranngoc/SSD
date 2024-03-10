@@ -29,7 +29,7 @@ class SSDNeck(nn.Module):
             nn.ReLU(inplace=True)
         )
         
-        # xavier_init(fc)
+        xavier_init(fc)
         
         # Feature extra layers
         extra_feature_layers = nn.ModuleList([
