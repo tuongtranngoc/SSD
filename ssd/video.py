@@ -64,8 +64,9 @@ class VideoPredictor:
             else:
                 break
         cap.release()
-        res.release()    
+        res.release()
         
 
 if __name__ == "__main__":
-    pass
+    video_pred = VideoPredictor()
+    video_pred.run('')

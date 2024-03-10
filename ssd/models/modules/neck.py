@@ -12,6 +12,7 @@ from . import *
 class SSDNeck(nn.Module):
     def __init__(self, backbone) -> None:
         super().__init__()
+        import ipdb; ipdb.set_trace();
         _, _, maxpool3_pos, maxpool4_pos, _ = (i for i, layer in enumerate(backbone) if isinstance(layer, nn.MaxPool2d))
         # Patch ceil_mode for maxpool3 to get the same WxH output sizes as the paper
         backbone[maxpool3_pos].ceil_mode = True
@@ -28,7 +29,7 @@ class SSDNeck(nn.Module):
             nn.Conv2d(in_channels=1024, out_channels=1024, kernel_size=1),  # FC7
             nn.ReLU(inplace=True)
         )
-        
+
         xavier_init(fc)
         
         # Feature extra layers
@@ -62,7 +63,7 @@ class SSDNeck(nn.Module):
                 nn.ReLU(inplace=True)
             )
         ])
-        
+
         xavier_init(extra_feature_layers)
         
         extra_feature_layers.insert(0, nn.Sequential(*backbone[maxpool4_pos:-1], fc)) # until conv5_3, skip maxpool5

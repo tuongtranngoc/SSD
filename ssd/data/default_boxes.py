@@ -6,7 +6,7 @@ import math
 import torch
 from collections import defaultdict
 
-from . import *
+from . import cfg
 
 
 class DefaultBoxesGenerator:

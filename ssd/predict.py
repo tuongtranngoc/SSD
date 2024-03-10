@@ -22,8 +22,8 @@ class Predictor:
             A.Normalize(),
             ToTensorV2()
         ])
-        self.dfboxes = DefaultBoxesGenerator.df_bboxes.to(cfg.device)
-    
+        self.dfboxes = DefaultBoxesGenerator.default_boxes.to(cfg.device)
+
     def __transform(self, image):
         image = image[..., ::-1]
         image = self.transform(image=image)

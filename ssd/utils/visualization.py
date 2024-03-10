@@ -138,7 +138,7 @@ class Visualizer:
     @classmethod
     def debug_matched_dfboxes(cls, dataset, idxs):
         os.makedirs(cfg.debug.matched_dfboxes, exist_ok=True) 
-        for i, idx in enumerate(list(range(100))):
+        for i, idx in enumerate(idxs):
             img_path, targets = dataset.voc_dataset[idx]
             target_labels, target_bboxes = targets[..., 0], targets[..., 1:]
             target_confs = np.ones_like(target_labels, dtype=np.float32)
@@ -174,7 +174,6 @@ class Visualizer:
             for fm in fm_sizes:
                 im_fm = im.copy()
                 pos_dfboxes = fm//2
-                # import ipdb; ipdb.set_trace();
                 dfboxes = dfboxes_fm[fm][pos_dfboxes, pos_dfboxes, ...].reshape(-1, 4)
                 dfboxes = BoxUtils.xcycwh_to_xyxy(dfboxes)
                 dfboxes = BoxUtils.denormalize_box(dfboxes)
@@ -209,7 +208,3 @@ class Visualizer:
                    save_graph=True, 
                    directory=cfg.debug.arch_model, 
                    graph_name=cfg.models.arch_name)
-        
-    @classmethod
-    def debug_negative(cls, idxs, preds):
-        pass

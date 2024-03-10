@@ -105,16 +105,16 @@ class BaseDataset(Dataset):
                     image_pth = os.path.join(image_dir, anno.filename)
                     if type(anno.object) is not list:
                         anno.object = [anno.object]
+                    
                     bboxes = []
                     for item in anno.object:
-                        if str(item.difficult) == '1':
-                            continue
+                        if item.difficult == '1' or item.name not in class2ids: continue
                         box = item.bndbox
                         box = [box.xmin, box.ymin, box.xmax, box.ymax]
                         box = [eval(c) for c in box]
-                        label = class2ids[str(item.name)]
+                        label = class2ids[item.name]
                         box_info = [label] + box
                         bboxes.append(box_info)
-                    dataset.append([image_pth, np.array(bboxes)])
+                    dataset.append([image_pth, np.array(bboxes, dtype=np.float32)])
                     
         return dataset

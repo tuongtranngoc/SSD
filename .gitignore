@@ -1,6 +1,6 @@
-dataset/COCO/annotations
-dataset/COCO/train2017
-dataset/COCO/val2017
-dataset/VOC/*
+dataset
 **/__pycache__/
 ssd/weights/*
+exps
+logs
+outputs

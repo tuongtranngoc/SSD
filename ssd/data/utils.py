@@ -10,14 +10,14 @@ class Transformation:
         image_size = cfg.models.image_size
         self.transformation = A.Compose([
             A.Resize(image_size, image_size),
-            A.Normalize(),
+            A.Normalize(always_apply=True),
             ToTensorV2()],
         bbox_params=A.BboxParams(format='pascal_voc', label_fields=['labels']))
     
     def transform(self, image, bboxes, labels):
         transformed = self.transformation(image=image, bboxes=bboxes, labels=labels)
-        transformed_image = transformed['image']
-        transformed_bboxes = np.array(transformed['bboxes'])
+        transformed_image = transformed['image'] 
+        transformed_bboxes = np.array(transformed['bboxes'], dtype=np.float32)
         transformed_labels = np.array(transformed['labels'])
         return transformed_image, transformed_bboxes, transformed_labels
     
@@ -34,4 +34,4 @@ def box_iou(box_a, box_b)->np.ndarray:
     area_a = ((box_a[:, 2]-box_a[:, 0]) * (box_a[:, 3]-box_a[:, 1])) 
     area_b = ((box_b[2]-box_b[0]) * (box_b[3]-box_b[1]))  
     union = area_a + area_b - inter
-    return inter / union
+    return inter / union 

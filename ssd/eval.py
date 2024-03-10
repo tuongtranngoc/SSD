@@ -20,8 +20,8 @@ class SSDEvaluate:
         self.dataset = dataset
         self.loss_fun = SSDLoss().to(cfg.device)
         self.dataloader = DataLoader(self.dataset,
-                                    shuffle=cfg.valid.shuffle, 
                                     batch_size=cfg.valid.batch_size, 
+                                    shuffle=cfg.valid.shuffle, 
                                     num_workers=cfg.valid.num_workers,
                                     pin_memory=cfg.valid.pin_memory)
         self.dfboxes = DefaultBoxesGenerator.df_bboxes.to(cfg.device)
@@ -33,7 +33,7 @@ class SSDEvaluate:
         preds = [{"boxes": pred_bbox, "scores": pred_conf, "labels": pred_class}]
         
         target = [{"boxes": gt_bbox, "scores": gt_conf, "labels": gt_class}]
-        
+
         map_mt.update(preds, target)
 
     def evaluate(self):
@@ -106,7 +106,7 @@ class SSDEvaluate:
 def cli():
     parser = argparse.ArgumentParser()
     parser.add_argument('--weight_type', type=str, default='best.pt', help='Types of the model weight: best.pt/last.pt')
-    parser.add_argument('--model_type', type=str, default='vgg16', help='Model selection: vgg16, vgg16-bn, resnet34, resnet50')
+    parser.add_argument('--model_type', type=str, default='vgg16_bn', help='Model selection: vgg16, vgg16-bn, resnet34, resnet50')
     parser.add_argument('--batch_size', type=int, default=cfg.valid.batch_size, help='Batch size of evaluation')
     parser.add_argument('--conf_thresh', type=float, default=cfg.debug.conf_thresh, help='Confidence threshold for evaluation')
     parser.add_argument('--iou_thresh', type=float, default=cfg.debug.iou_thresh, help='Iou threshold for evaluation')

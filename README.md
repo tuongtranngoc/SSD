@@ -58,3 +58,12 @@ python -m src.eval --model_type vgg16/vgg16-bn --weight_type path_to_weight_best
 ```shell
 python -m src.predict --model_type rvgg16/vgg16-bn--weight_path path_to_weight_best.pt --input_folder path_input_folder --output_folder path_to_output_folder --conf_thresh confidence_threshold --iou_thresh iou threshold 
 ```
+
+### Tensorboard
+```shell
+tensorboard --logdir=exps/tensorboard
+```
+
+| Loss | mAP|
+|:---:|:---:|
+|<img src="/images/loss.png">|<img src="/images/map.png">|

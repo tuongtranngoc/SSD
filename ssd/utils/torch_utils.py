@@ -16,21 +16,24 @@ class BoxUtils:
     h, w = cfg.models.image_size, cfg.models.image_size
     @classmethod
     def xcycwh_to_xyxy(cls, bboxes:torch.Tensor):
-        xyxy = bboxes.clone()
-        xyxy[..., [0, 1]] = bboxes[..., :2] - bboxes[..., 2:] / 2
-        xyxy[..., [2, 3]] = bboxes[..., :2] + bboxes[..., 2:] / 2
-        xyxy = torch.clamp(xyxy, min=0, max=1.0)
+        bboxes = bboxes.clone()
+        x1y1 = bboxes[..., :2] - bboxes[..., 2:] / 2
+        x2y2 = bboxes[..., :2] + bboxes[..., 2:] / 2
 
-        return xyxy
+        x1y1x2y2 = torch.cat((x1y1, x2y2), dim=1)
+        x1y1x2y2 = torch.clamp(x1y1x2y2, min=0, max=1.0)
+
+        return x1y1x2y2
     
     @classmethod
     def xyxy_to_xcycwh(cls, bboxes: torch.Tensor):
-        xcycwh = bboxes.clone()
-        xcycwh[..., [2, 3]] = bboxes[..., 2:] - bboxes[..., :2]
-        xcycwh[..., [0, 1]] = bboxes[..., 2:] - bboxes[..., [2, 3]] / 2.0
-        xcycwh = torch.clamp(xcycwh, min=0, max=1.0)
+        bboxes = bboxes.clone()
+        wh = bboxes[..., 2:] - bboxes[..., :2]
+        xcyc = bboxes[..., 2:] - wh / 2.0
+        xcyxwh = torch.cat((xcyc, wh), dim=1)
+        xcyxwh = torch.clamp(xcyxwh, min=0, max=1.0)
 
-        return xcycwh
+        return xcyxwh
     
     @classmethod
     def pairwise_ious(cls, x:torch.Tensor, y:torch.Tensor):
@@ -43,7 +46,7 @@ class BoxUtils:
         unions = abs((x[:, None, 2] - x[:, None,  0]) * (x[:, None, 3] - x[:, None, 1])) + \
                  abs((y[..., 2] - y[..., 0]) * (y[..., 3] - y[..., 1])) - intersect
         intersect[intersect.gt(0)] = intersect[intersect.gt(0)] / unions[intersect.gt(0)]
-        
+
         return intersect
 
     @classmethod
@@ -52,9 +55,10 @@ class BoxUtils:
         dfboxes = dfboxes.to(pred_bboxes.device)
         pred_bboxes = pred_bboxes.clone()
         # transform offset into cxcywh
-        pred_bboxes[..., [0, 1]] = pred_bboxes[..., [0, 1]] * (dfboxes[..., [2, 3]] * cfg.default_boxes.standard_norms[1]) + dfboxes[..., [0, 1]]
-        pred_bboxes[..., [2, 3]] = torch.exp(pred_bboxes[..., [2, 3]] * cfg.default_boxes.standard_norms[0]) * dfboxes[..., [2, 3]]
-        return pred_bboxes
+        xcyc = pred_bboxes[..., :2] * (dfboxes[..., 2:] * cfg.default_boxes.standard_norms[1]) + dfboxes[..., :2]
+        wh = torch.exp(pred_bboxes[..., 2:] * cfg.default_boxes.standard_norms[0]) * dfboxes[..., 2:]
+        xcycwh = torch.cat((xcyc, wh), dim=1)
+        return xcycwh
     
     @classmethod
     def normalize_box(cls, bboxes:torch.Tensor):
@@ -148,6 +152,7 @@ class DataUtils:
         elif isinstance(image, np.ndarray):
             image = cls.denormalize(image)
             image = np.ascontiguousarray(image, np.uint8)
+            image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
             return image
         else:
             raise Exception(f"{image} is a type of {type(image)}, not numpy/tensor type")

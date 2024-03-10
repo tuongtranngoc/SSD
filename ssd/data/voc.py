@@ -63,6 +63,7 @@ class VOCDataset(BaseDataset):
         # Convert xyxy to xcyxwh and simplify targets
         bboxes_pos = BoxUtils.xyxy_to_xcycwh(bboxes_pos)
         dfbox_pos = BoxUtils.xyxy_to_xcycwh(dfbox_pos)
+        
         dfbox_pos = self.encode_ssd(bboxes_pos, dfbox_pos)
         dfboxes_mask[dfbox_idx_pos] = dfbox_pos
         
