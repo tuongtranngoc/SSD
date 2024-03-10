@@ -8,32 +8,57 @@ import torch
 import argparse
 import numpy as np
 from tqdm import tqdm
+import albumentations as A
+from albumentations.pytorch.transforms import ToTensorV2
 
 from . import *
-from .predict import Predictor
 
 logger = Logger.get_logger("VIDEO_PREDICTOR")
 
 
 class VideoPredictor:
     def __init__(self) -> None:
-        self.predictor = Predictor()
+        self.model = SSDModel(cfg.models.arch_name).to(cfg.device)
+        self.model = self.load_ckpt(self.model, os.path.join(cfg.debug.ckpt_dirpath, cfg.models.arch_name, 'best.pt'))
+        self.transform = A.Compose([
+            A.Resize(cfg.models.image_size, cfg.models.image_size),
+            A.Normalize(),
+            ToTensorV2()
+        ])
+        self.dfboxes = DefaultBoxesGenerator.df_bboxes.to(cfg.device)
+
+    def __transform(self, image):
+        image = image[..., ::-1]
+        image = self.transform(image=image)
+        return image['image']
+    
+    def load_ckpt(self, model, ckpt_pth):
+        if os.path.exists(ckpt_pth):
+            ckpt = torch.load(ckpt_pth, map_location=cfg.device)
+            model.load_state_dict(ckpt['model'])
+            return model
+        else:
+            raise Exception(f'Path to the model {ckpt_pth} not exist')
 
     def run(self, video_path):
+        os.makedirs(cfg.debug['prediction'], exist_ok=True)
         cap = cv2.VideoCapture(video_path)
-        size = (int(cap.get(3)), int(cap.get(4)))
+        size = (300, 300)
+        fps = int(cap.get(5))
+        logger.info(f"Video size: {size}")
         if cap.isOpened() is False:
             logger.info("Error opening video file")
             exit()
         res = cv2.VideoWriter(os.path.join(cfg.debug['prediction'], \
-                                        os.path.basename(video_path)), \
-                                        fourcc=cv2.VideoWriter_fourcc(*'MJPG'), fps=15, frameSize=size)
-
-        while(cap.isOpened()):
+                                        os.path.basename(video_path).replace('mp4', 'avi')), \
+                                        fourcc=cv2.VideoWriter_fourcc(*'MJPG'), fps=fps, frameSize=size)
+        i = 0
+        while True:
             ret, frame = cap.read()
             if ret is True:
-                image = frame.copy()
-                image = self.__transform(image)
+                i+=1
+                logger.info(f"Frame {i}")
+                image = self.__transform(frame)
                 image = image.to(cfg.device)
                 image = image.unsqueeze(0)
 
@@ -59,8 +84,9 @@ class VideoPredictor:
                     pred_bboxes, confs, cates = DataUtils.to_numpy([pred_bboxes, pred_confs, pred_cates])
                     image = DataUtils.image_to_numpy(image)
                     # Visualize debug images
-                    image = Visualizer.draw_objects(image, pred_bboxes, confs, cates, cfg.debug.conf_thresh, type_obj='PRED', unnormalize=True)
+                    image = Visualizer.draw_objects(image, pred_bboxes, confs, cates, 0.85, type_obj='PRED', unnormalize=True)
                     res.write(image)
+
             else:
                 break
         cap.release()
@@ -69,4 +95,4 @@ class VideoPredictor:
 
 if __name__ == "__main__":
     video_pred = VideoPredictor()
-    video_pred.run('')
+    video_pred.run('images/test.mp4')

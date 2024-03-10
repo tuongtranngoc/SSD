@@ -12,7 +12,6 @@ from . import *
 class SSDNeck(nn.Module):
     def __init__(self, backbone) -> None:
         super().__init__()
-        import ipdb; ipdb.set_trace();
         _, _, maxpool3_pos, maxpool4_pos, _ = (i for i, layer in enumerate(backbone) if isinstance(layer, nn.MaxPool2d))
         # Patch ceil_mode for maxpool3 to get the same WxH output sizes as the paper
         backbone[maxpool3_pos].ceil_mode = True
