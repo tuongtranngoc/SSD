@@ -174,6 +174,7 @@ class Visualizer:
             for fm in fm_sizes:
                 im_fm = im.copy()
                 pos_dfboxes = fm//2
+                # import ipdb; ipdb.set_trace();
                 dfboxes = dfboxes_fm[fm][pos_dfboxes, pos_dfboxes, ...].reshape(-1, 4)
                 dfboxes = BoxUtils.xcycwh_to_xyxy(dfboxes)
                 dfboxes = BoxUtils.denormalize_box(dfboxes)

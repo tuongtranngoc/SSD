@@ -16,21 +16,21 @@ class BoxUtils:
     h, w = cfg.models.image_size, cfg.models.image_size
     @classmethod
     def xcycwh_to_xyxy(cls, bboxes:torch.Tensor):
-        bboxes = bboxes.clone()
-        bboxes[..., [0, 1]] = bboxes[..., :2] - bboxes[..., 2:] / 2
-        bboxes[..., [2, 3]] = bboxes[..., :2] + bboxes[..., 2:] / 2
-        bboxes = torch.clamp(bboxes, min=0, max=1.0)
+        xyxy = bboxes.clone()
+        xyxy[..., [0, 1]] = bboxes[..., :2] - bboxes[..., 2:] / 2
+        xyxy[..., [2, 3]] = bboxes[..., :2] + bboxes[..., 2:] / 2
+        xyxy = torch.clamp(xyxy, min=0, max=1.0)
 
-        return bboxes
+        return xyxy
     
     @classmethod
     def xyxy_to_xcycwh(cls, bboxes: torch.Tensor):
-        bboxes = bboxes.clone()
-        bboxes[..., [2, 3]] = bboxes[..., 2:] - bboxes[..., :2]
-        bboxes[..., [0, 1]] = bboxes[..., 2:] - bboxes[..., [2, 3]] / 2.0
-        bboxes = torch.clamp(bboxes, min=0, max=1.0)
+        xcycwh = bboxes.clone()
+        xcycwh[..., [2, 3]] = bboxes[..., 2:] - bboxes[..., :2]
+        xcycwh[..., [0, 1]] = bboxes[..., 2:] - bboxes[..., [2, 3]] / 2.0
+        xcycwh = torch.clamp(xcycwh, min=0, max=1.0)
 
-        return bboxes
+        return xcycwh
     
     @classmethod
     def pairwise_ious(cls, x:torch.Tensor, y:torch.Tensor):
