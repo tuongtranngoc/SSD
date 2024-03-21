@@ -9,7 +9,7 @@ import glob
 import cv2
 import os
 
-from .default_boxes import DefaultBoxesGenerator
+from .dfboxes import DefaultBoxesGenerator
 from .augmentations import AlbumAug
 from .base import BaseDataset
 from .utils import Transformation

@@ -23,7 +23,7 @@ class AlbumAug:
             A.MedianBlur(p=0.1, blur_limit=5),
             A.ShiftScaleRotate(p=0.3, rotate_limit=15),
             A.HueSaturationValue(hue_shift_limit=20, sat_shift_limit=20, val_shift_limit=20, p=0.3),
-            ],
+            ], p=0.5,
         bbox_params=A.BboxParams(format='pascal_voc', label_fields=['labels'], min_visibility=0.3))
     
     def __call__(self, image, bboxes, labels):

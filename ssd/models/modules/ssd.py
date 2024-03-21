@@ -18,7 +18,7 @@ class SSDModel(nn.Module):
         super().__init__()
         backbone = vgg16_extractor(arch_name)
         self.neck = SSDNeck(backbone)
-        self.head = SSDHead(cfg.voc_dataset.num_classes, cfg.models.fm_channels, cfg.default_boxes.dfboxes_sizes)
+        self.head = SSDHead(cfg.voc_dataset.num_classes, cfg.models.fm_channels, cfg.default_boxes.num_dfboxes)
     
     def forward(self, x):
         x = self.neck(x)

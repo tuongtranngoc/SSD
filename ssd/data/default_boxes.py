@@ -15,7 +15,7 @@ class DefaultBoxesGenerator:
     im_size = cfg.models.image_size
     s_max = cfg.default_boxes.s_max
     aspect_ratios = cfg.default_boxes.aspect_ratios
-    dfbox_sizes = cfg.default_boxes.dfboxes_sizes
+    dfbox_sizes = cfg.default_boxes.num_dfboxes
     standard_norms = cfg.default_boxes.standard_norms
     
     @classmethod

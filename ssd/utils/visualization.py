@@ -163,6 +163,7 @@ class Visualizer:
     def debug_dfboxes_generator(cls, dataset, idxs):
         os.makedirs(cfg.debug.dfboxes_generator, exist_ok=True)
         fm_sizes = cfg.default_boxes.fm_sizes
+        num_dfboxes = cfg.default_boxes.num_dfboxes
         dfboxes_fm = DefaultBoxesGenerator.build_default_boxes()
         
         for i in idxs:
@@ -171,10 +172,11 @@ class Visualizer:
             im = cv2.resize(im, (cfg.models.image_size, cfg.models.image_size))
             id_pth = os.path.join(cfg.debug.dfboxes_generator)
             os.makedirs(id_pth, exist_ok=True)
-            for fm in fm_sizes:
+            for fm, num in zip(fm_sizes, num_dfboxes):
                 im_fm = im.copy()
-                pos_dfboxes = fm//2
-                dfboxes = dfboxes_fm[fm][pos_dfboxes, pos_dfboxes, ...].reshape(-1, 4)
+                pos = fm//2
+                # import ipdb; ipdb.set_trace();
+                dfboxes = torch.tensor(dfboxes_fm[fm]).reshape((fm, fm, num, 4))[pos, pos, ...]
                 dfboxes = BoxUtils.xcycwh_to_xyxy(dfboxes)
                 dfboxes = BoxUtils.denormalize_box(dfboxes)
                 dfboxes = dfboxes.detach().cpu().numpy()

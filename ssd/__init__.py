@@ -8,5 +8,5 @@ from ssd.models.modules.ssd import SSDModel
 from ssd.utils.tensorboard import Tensorboard
 from ssd.cfg.defaults import Configuration as cfg
 from ssd.utils.torch_utils import DataUtils, BoxUtils
-from ssd.data.default_boxes import DefaultBoxesGenerator
+from ssd.data.dfboxes import DefaultBoxesGenerator
 from ssd.utils.visualization import Visualizer, AnnotationTool
