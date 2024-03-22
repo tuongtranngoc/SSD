@@ -18,7 +18,7 @@ class DefaultBoxesGenerator:
 
     @classmethod
     def build_default_boxes(cls):
-        priors = defaultdict(list)
+        df_boxes = defaultdict(list)
         for k, (f, s) in enumerate(zip(cls.feature_maps, cls.num_dfboxes)):
             scale = cls.image_size / cls.strides[k]
             for i, j in product(range(f), repeat=2):
@@ -29,22 +29,22 @@ class DefaultBoxesGenerator:
                 # small sized square box
                 size = cls.min_sizes[k]
                 h = w = size / cls.image_size
-                priors[f].append([cx, cy, w, h])
+                df_boxes[f].append([cx, cy, w, h])
 
                 # big sized square box
                 size = sqrt(cls.min_sizes[k] * cls.max_sizes[k])
                 h = w = size / cls.image_size
-                priors[f].append([cx, cy, w, h])
+                df_boxes[f].append([cx, cy, w, h])
 
                 # change h/w ratio of the small sized box
                 size = cls.min_sizes[k]
                 h = w = size / cls.image_size
                 for ratio in cls.aspect_ratios[k]:
                     ratio = sqrt(ratio)
-                    priors[f].append([cx, cy, w * ratio, h / ratio])
-                    priors[f].append([cx, cy, w / ratio, h * ratio])
+                    df_boxes[f].append([cx, cy, w * ratio, h / ratio])
+                    df_boxes[f].append([cx, cy, w / ratio, h * ratio])
 
-        return priors
+        return df_boxes
     
     @classmethod
     def merge_defaultboxes(cls, dfboxes_dict:dict):
