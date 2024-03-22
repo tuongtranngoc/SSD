@@ -13,7 +13,6 @@ class Configuration:
     })
     
     default_boxes = EasyDict({
-        # 'aspect_ratios': [1, 2, 3, 1/2, 1/3],
         'aspect_ratios': [[2], [2, 3], [2, 3], [2, 3], [2], [2]],
         'strides': [8, 16, 32, 64, 100, 300],
         'min_sizes': [30, 60, 111, 162, 213, 264],
@@ -22,7 +21,7 @@ class Configuration:
         's_max': 0.9,
         'fm_sizes': [38, 19, 10, 5, 3, 1],
         'num_dfboxes': [4, 6, 6, 6, 4, 4],
-        'iou_thresh': 0.55,
+        'iou_thresh': 0.6,
         'ratio_pos_neg': 3,
         'alpha': 1,
         'label_smooth': 0.1,
