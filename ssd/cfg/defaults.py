@@ -21,7 +21,7 @@ class Configuration:
         's_max': 0.9,
         'fm_sizes': [38, 19, 10, 5, 3, 1],
         'num_dfboxes': [4, 6, 6, 6, 4, 4],
-        'iou_thresh': 0.6,
+        'iou_thresh': 0.35,
         'ratio_pos_neg': 3,
         'alpha': 1,
         'label_smooth': 0.1,

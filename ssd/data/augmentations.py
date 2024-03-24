@@ -38,7 +38,7 @@ class AlbumAug:
 
 
 class RandomIouCrop:
-    def __init__(self, p: float = 0.5, min_scale: float = 0.3,
+    def __init__(self, p: float = 0.3, min_scale: float = 0.3,
                  max_scale: float = 1.0, min_aspect_ratio: float = 0.5, max_aspect_ratio: float = 2.0,
                  sampler_options = None, trials: int = 40):
         self.min_scale = min_scale

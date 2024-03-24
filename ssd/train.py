@@ -41,7 +41,7 @@ class Trainer:
     def create_model(self):
         self.model = SSDModel(cfg.models.arch_name).to(cfg.device)
         self.loss_fn = SSDLoss()
-        self.optimizer = torch.optim.AdamW(self.model.parameters(), lr=cfg.training.lr, amsgrad=True)
+        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=cfg.training.lr)
         
         if self.args.resume:
             logger.info("Resuming training ...")

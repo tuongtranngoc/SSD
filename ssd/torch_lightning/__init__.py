@@ -1,1 +1,0 @@
-from ssd.cfg.defaults import Configuration as cfg
