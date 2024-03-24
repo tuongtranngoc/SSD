@@ -17,12 +17,12 @@ SSD is simply relative to methods that require object proposals because it elimi
 | Backbone | Dataset | Training dataset | Valid dataset | Image size | mAP | mAP_50 | mAP_75 |
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 |Original paper|PASCAL VOC|trainval 2007+2012|test2007|300x300|--|74.3|--|
-|Our implementation|PASCAL VOC|trainval 2007+2012|test2007|300x300|3.71|62.2|39.6|
+|Our implementation|PASCAL VOC|trainval 2007+2012|test2007|300x300|3.80|65.2|39.1|
 
 ## Dataset
 + Download Pascal VOC train+val 2012+2007
 + Download Pascal VOC test 2007
-
+s
 Put all images, annotations, and `.txt` files in folder `dataset/VOC` folder as follows:
 
 ```shell
