@@ -74,9 +74,6 @@ if __name__ == "__main__":
     predictor = Predictor()
     IMAGE_ID = "dataset/VOC/images_id/test2007.txt"
     IMAGE_PTH = "dataset/VOC/images/test2007"
-    with open(IMAGE_ID, 'r') as f_id:
-        list_img_ids = f_id.readlines()
-        for img_id in tqdm(list_img_ids):
-            img_id = img_id.strip()
-            image_path = os.path.join(IMAGE_PTH, img_id + '.jpg')
-            result = predictor.predict(image_path)
+    IMAGE_TEST = "dataset/VOC/images/test2007/000004.jpg"
+
+    result = predictor.predict(IMAGE_TEST)
